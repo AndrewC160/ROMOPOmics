@@ -1,0 +1,14 @@
+alias	example1	field	table	field_idx	set_value
+bcr_patient_barcode	tcga-a1-a0sb	person_source_value	PERSON		
+bam_file	dbGAP	file_type_source_value	SEQUENCING		
+matched_norm_sample_desc	normal sample barcode	file_remote_repo_value	SEQUENCING	1	normal sample barcode
+matched_norm_sample_barcode	TCGA-A1-A0SB-10B-01D-A142-09	file_remote_repo_id	SEQUENCING	1	
+matched_norm_sample_metric	transcripts	metric_source_value	SEQUENCING	1	transcripts
+ncbi_build	37	reference_genome_value	SEQUENCING		
+sequence_source	WXS	library_concept_value	SEQUENCING		
+sequencer	Illumina GAIIx	instrument_source_value	SEQUENCING		
+tumor_sample_barcode_desc	tumor sample barcode	file_remote_repo_value	SEQUENCING	2	tumor sample barcode
+tumor_sample_barcode	TCGA-A1-A0SB-01A-11D-A142-09	file_remote_repo_id	SEQUENCING	2	
+tumor_sample_barcode_metric	transcripts	metric_source_value	SEQUENCING	2	transcripts
+tumor_sample_uuid	db9d40fb-bfce-4c3b-a6c2-41c5c88982f1	specimen_source_id	SPECIMEN		
+validation_method	none	sequencing_validation_method	SEQUENCING		

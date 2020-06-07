@@ -7,83 +7,90 @@ output: html_document
 
 ```{r setup, include=FALSE}
 library(tidyverse)
+library(dbplyr)
 library(data.table)
 library(knitr)
 library(kableExtra)
 library(here)
 library(RSQLite)
+library(ROMOPOmics)
 
 dirs      <- list()
 #Something wierd about how here() works within and without a markdown; check for interactivity.
 #dirs$base <- ifelse(interactive(),
 #                    file.path(here(),
 #                    file.path(here(),"demo"))
-dirs$base     <- file.path(here())
+dirs$base     <- file.path(here(),"demo")
 dirs$data     <- file.path(dirs$base,"data")
 dirs$masks    <- file.path(dirs$base,"masks")
-dirs$seq_data <- file.path(dirs$base,"sequencing")
-dirs$hla_data <- file.path(dirs$base,"hla")
-dirs$database <- file.path(dirs$base,"database")
+#dirs$database <- file.path(dirs$base,"database")
 
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
 #ROMOPOmics
 
-The purpose of ROMOPOmics is to incorporate the wide variety of sequencing-type data sets, including all pipeline by byproducts (alignment files, raw reads, readmes, etc.) as well as pipeline products of any type (gene counts, differential expression data, quality control analyses, etc.), into an SQL-friendly database that is easily accessed by users. The package should be a quick download that allows users to specify a data directory and a desired database name, a master file describing their desired SQL tables, and should allow users to build and update their existing SQL database at will
+The purpose of ROMOPOmics is to incorporate the wide variety of sequencing-type data sets, including all pipeline by byproducts (alignment files, raw reads, readmes, etc.) as well as pipeline products of any type (gene counts, differential expression data, quality control analyses, etc.), into an SQL-friendly database that is easily accessed by users. The package should be a quick installation that allows users to specify a data directory and a mask file describing how to map that data's fields into the data model, and will return tables formatted for SQLite incorporation.
 
 ![ROMOPOmics diagram](`r file.path(dirs$base,"romopomics_2.0.PNG")`)
 
-#Step 1: Install and load ROMOPOmics and its dependencies.
-```{r loadPackages,message=FALSE,echo=TRUE}
-library(ROMOPOmics)
-```
-
-#Step 2: Load the OMOP data model, in this case [OMOP 6.0](https://github.com/OHDSI/CommonDataModel/blob/master/OMOP_CDM_v6_0.csv).
+#Step 1: Load the OMOP data model, in this case [OMOP 6.0](https://github.com/OHDSI/CommonDataModel/blob/master/OMOP_CDM_v6_0.csv).
 
 > `loadDataModel()` can return the data model as a single table or as a list of OMOP tables.
 
 ```{r loadDataModel,echo=TRUE}
-new_dm_file   <- file.path(dirs$base,"OMOP_CDM_v6_0_custom.csv")
-old_dm_file   <- file.path(dirs$base,"OMOP_CDM_v6_0.csv")
-dm      <- loadDataModel(as_table_list = FALSE,master_table_file = new_dm_file)
-dm_lst  <- loadDataModel(as_table_list = TRUE,master_table_file = new_dm_file)
-dm_old  <- loadDataModel(as_table_list = FALSE,master_table_file = old_dm_file)
+dm_file <- system.file("extdata","OMOP_CDM_v6_0_custom.csv",package="ROMOPOmics",mustWork = TRUE)
+dm      <- loadDataModel(as_table_list = FALSE,master_table_file = dm_file)
 ```
 
-Default OMOP values were downloaded from the [OMOP 6.0 GitHub](https://github.com/OHDSI/CommonDataModel/blob/master/OMOP_CDM_v6_0.csv). This data model includes `r length(unique(dm_old$field))` unique fields accross `r length(unique(dm_old$table))` tables:
-```{r previewOMOP,echo=FALSE}
-dm_old %>%
-  filter(row_number() <= 8) %>% 
-  select(-table_index) %>%
-  add_row(field="...",required="...",type="...",description="...",table="...") %>%
-  kable() %>% 
-  kable_styling(full_width=FALSE)
-```
-
-Our customized version of the OMOP data model includes two changes: First, an `hla_source_value` field is included in the `PERSON` table. This change should be self-explanatory, though it may be preferred that this value be recorded per-`Patient` as an observation in the `OBSERVATION` table by the strict standards of OMOP.
-
-Second, our customized version includes a `SEQUENCING` table: 
+This data model is a modified version of the OMOP model downloaded from the [OMOP 6.0 GitHub](https://github.com/OHDSI/CommonDataModel/blob/master/OMOP_CDM_v6_0.csv). This data model includes `r nrow(dm)` fields distributed among `r length(unique(dm$table))` tables. Unique to this version of the data model is the inclusion of an `hla_source_value` field in the `PERSON` table. Second, our customized version includes a `SEQUENCING` table: 
 
 ```{r previewCustomOMOP,echo=FALSE}
-dm_lst$SEQUENCING %>%
+dm %>% 
+  filter(table=="sequencing") %>%
   mutate(description = gsub(" CUSTOM$","",description)) %>%
   select(-table_index) %>%
   kable() %>%
   kable_styling(full_width=FALSE)
 ```
 
-This table inherits from `PERSON` and `SPECIMEN` currently, but this is changeable. I attempted to emulate the current OMOP model's verbage as well, so these terms are not official. The reasons for including this table are two fold: First, sequencing data is excedingly common in contemporary research, and is increasingly common in personalized medicine techniques. Second, to be truly useful "Sequencing" data should be able to incorporate the spectrum of products along the testing pipeline, from library preparation to sequencing to data analysis. This will allow for intermediate steps and files to be used (getting and using raw files rather than the gene counts, for example). But crucially, this will facilitate comparisons using data sets between different studies, which must account for differences in library preparation, quality control, alignment methods, reference data, etc.  Including this data should make this easier, but incorporating this variety of variables is not intuitive in the existing OMOP model.
+This table inherits from `PERSON` and `SPECIMEN`. The reasons for including this table are two fold: First, sequencing data is excedingly common in contemporary research, and is increasingly common in personalized medicine techniques. Second, to be truly useful "Sequencing" data should be able to incorporate the spectrum of products along the testing pipeline, from library preparation to sequencing to data analysis. This will allow for intermediate steps and files to be used (getting and using raw files rather than the gene counts, for example). But crucially, this will facilitate comparisons using data sets between different studies, which must account for differences in library preparation, quality control, alignment methods, reference data, etc.  Including this data should make this easier, but incorporating this variety of variables is not intuitive in the existing OMOP model.
 
-#Step 3: Administrators design masks for data input.
+#Step 2: Design and load input masks to translate database values into OMOP fields and tables.
 ```{r loadMasks,echo=TRUE}
-msks  <- loadModelMasks(mask_file_directory = file.path(dirs$base,"masks"))
+msks  <- loadModelMasks(mask_file_directory = dirs$masks)
 ```
 
-"Masks" are designed to streamline the addition of existing data sets to OMOP format, or at least to how the *admin* thinks these data sets should be incorporated. The mask file provides `table`, `alias`, and `field` columns, which describe each term's OMOP table, its name within the user's input file, and its name within the standard OMOP field, respectively. For instance, `patient_name` in the user's database will likely map to `person_source_value` in current OMOP parlance. Using multiple masks should streamline the use of multiple analysis types as well: the database administrators can develop and implement masks and users won't need to know that `patient_name` and `cell_line_name` are both synonymous with `person_source_value` in the OMOP framework, for instance. Thus "Sequencing" data can be added using the `sequencing` mask, while "HLA"" data can be incorporated using an `hla` mask. Here's an example of a `Sequencing` mask, provided to the `loadModelMasks()` function as a CSV:
+"Masks" are designed to streamline the addition of existing data sets to OMOP format, or at least to how the *admin* thinks these data sets should be incorporated. The mask file provides `table`, `alias`, and `field` columns, which describe each term's OMOP table, its name within the user's input file, and its name within the standard OMOP field, respectively. For instance, `patient_name` in the user's database will likely map to `person_source_value` in current OMOP parlance. Using multiple masks should streamline the use of multiple analysis types as well: the database administrators can develop and implement masks and users won't need to know that `patient_name` and `cell_line_name` are both synonymous with `person_source_value` in the OMOP framework, for instance. Thus "Sequencing" data can be added using the `sequencing` mask, while "HLA"" data can be incorporated using an `hla` mask. Here's an example of a mask formatted [TCGA](https://www.cancer.gov/about-nci/organization/ccg/research/structural-genomics/tcga) clinical data, provided to the `loadModelMasks()` function as a CSV:
 
-```{r previewSequencingMask,echo=FALSE}
-msks$sequencing %>%
+```{r previewClinicalMask,echo=FALSE}
+msks$brca_clinical %>%
+  select(alias,table,field,field_idx,set_value,example1) %>%
+  mutate_all(function(x) ifelse(is.na(x),"",x)) %>%
+  rename(example=example1) %>%
+  kable() %>%
+  kable_styling(full_width = FALSE) %>%
+  row_spec(0,font_size = 20,italic=TRUE,hline_after = TRUE) %>%
+  column_spec(c(1:3),color="black") %>%
+  column_spec(c(1),background = "lightgray",border_right = TRUE,border_left = TRUE) %>%
+  column_spec(c(2),bold=TRUE) %>%
+  column_spec(c(4,5),color = "gray")
+```
+
+#### **Column names**
+  
+  + **alias**: Field name for a value according to the input dataset.
+  
+  + **field**: Field name for a value according to the selected data model.
+  
+  + **table**: Table name for a value according to the selected data model.
+  
+  + **field_idx**: Since OMOP format anticipates a one-column-per-treatment/observation/measurement format, appending a value here other than `NA` allows for new columns to be added for each such value. For instance, two inputs can be mapped to `value_as_number` by including a value here and causing each measurement to be added to a separate column. In effect, one column per measurement.
+  
+  + **set_value**: Default value that is added to the given table and field regardless of input. Useful for specifying units, descriptions, etc. when facilitating the multiple-column transition.
+  
+```{r previewMutationngMask,echo=FALSE,eval=FALSE}
+msks$brca_mutation %>%
   select(alias,everything()) %>%
   kable() %>%
   kable_styling(full_width = FALSE) %>%
@@ -91,45 +98,73 @@ msks$sequencing %>%
   column_spec(c(4,5),color = "gray")
 ```
 
-Masks only need to include mapped OMOP values: if nothing is mapped to the `DRUG_ERA` field `gap_days`, it does not need to be included. So far the only requirement is that for a given mask, all aliases must be unique (otherwise it would be possible to have ambiguous mappings if the same field exists in  multiple tables; think `unit_value`). Extra columns, such as `description` and `example` columns here, are ignored, which may be useful when developing Shiny apps or other such UI implementations of these masks.
+#Step 3: Use masks to translate the input dataset into OMOP format.
 
-#Step 4: Provide users with "masked" input options.
+Using the `readInputFiles()` function, data table inputs are translated into the OMOP format according to the provided `mask` (in this case `brca_clinical` and `brca_mutation`). Tables in this format are "exhaustive" in that they include all possible fields and tables in the data model, including unused ones.
 
-A UI can be designed here, but as a simple example in this case users can be provided a simple TSV that includes one column per dataset. Users fill in the masked fields in this file and then these files are stored in the sequencing data folder.
 ```{r saveMasks,echo=TRUE,message=FALSE}
-lapply(names(msks), function(x) msks[[x]] %>%
-  select(alias) %>%
-  mutate(input= "") %>%
-  write.table(file = file.path(dirs$base,paste0(x,"_input.tsv")),sep="\t",row.names = FALSE,col.names = FALSE))
+tcga_files  <- dir(dirs$data,full.names = TRUE)
+names(tcga_files) <- gsub(".csv","",basename(tcga_files))
+
+omop_inputs <- lapply(names(tcga_files), function(x) readInputFiles(tcga_files[[x]],data_model=dm,mask_table=msks[[x]]))
 ```
 
-#Step 5: Import all tables and convert them to OMOP-formatted tables.
+#Step 4: Combine all input tables into one set of OMOP tables.
 
-Using the `readInputFiles()` function, data table inputs are translated into the OMOP format according to the provided `mask` (in this case `Sequencing`). This format is an "exhaustive" data table containing a row for every table/field combination in the data model (`dm`), including those not used in the mask. Every data set provided is assigned to a column, with `NA` for all empty values.
-
-Since these tables are exhaustive and compatible with the original data model, at this point all tables can be combined (regardless of mask used) into a single OMOP table using `combineInputTables()`. This function combines all data sets from all mask types, and filters out all OMOP tables from the data model that are unused (no entries in any of the associated fields). Tables are not "partially" used; if any field is included from that table, all fields from that table are included. The only exception to this is table indices: if a table inherits an index from an unused table, that index column is dropped. 
+Since tables read via `readInputFiles()` include all fields and tables from the data model, these tables can be combined regardless of input type or mask used using `combineInputTables()`. This function combines all data sets from all mask types, and filters out all OMOP tables from the data model that are unused (no entries in any of the associated fields). Tables are not "partially" used; if any field is included from that table, all fields from that table are included. The only exception to this is table indices: if a table inherits an index from an unused table, that index column is dropped.
 
 Once data has been loaded into a single comprehensive table, an index column (`<table_name>_index`) is assigned for each permutation of all data sets included in each used table, and formats the `type` of each column based on the data model's specification (`VARCHAR(50)` is changed to "character", `INTEGER` is changed to "integer", etc.). Finally, this function returns each formatted OMOP table in a named list.
 ```{r parseToOMOP,echo=TRUE}
-seq_input_files <- Sys.glob(file.path(dirs$seq_data,"*.tsv"))
-omop_tabs       <- lapply(seq_input_files,readInputFiles,data_model = dm,mask_table=msks$sequencing) %>%
-                    combineInputTables()
+db_inputs   <- combineInputTables(input_table_list = omop_inputs)
 ```
 
-In this example using this mask, the OMOP tables included are `r paste(names(omop_tabs)[1:(length(omop_tabs)-1)],collapse=", ")`, and `r names(omop_tabs)[length(omop_tabs)]`.
+In this example using these masks, the OMOP tables included are `r paste(names(db_inputs)[1:(length(db_inputs)-1)],collapse=", ")`, and `r names(db_inputs)[length(db_inputs)]`.
 
 #Step 6: Add OMOP-formatted tables to a database.
 
-`Dplyr` has built-in SQLite functionality, which is used here. While size limitations may neccessitate Perl or C based database functions for larger databases, with smaller ones this package's `buildSQLDBR()` function should suffice to add the formatted, indexed OMOP tables to a new SQLite database, and returns a connection to that database for queries.
+The tables compiled in `db_inputs` are now formatted for a SQLite database. `Dplyr` has built-in SQLite functionality, which is wrapped in the function `buildSQLDBR()`. However, building a database using any other package is amenable here.
 ```{r buildDatabase,echo=TRUE}
-omop_db     <- buildSQLDBR(omop_tabs,sql_db_file = file.path(dirs$database,"sqlDB.sqlite"))
-```
+omop_db     <- buildSQLDBR(db_inputs,sql_db_file = file.path(dirs$base,"sqlDB.sqlite"))
 
-```{r showDatabase,echo=TRUE}
 dbListTables(omop_db)
 dbListFields(omop_db,"PERSON")
-dbGetQuery(omop_db,'SELECT person_source_value, person.person_id, file_local_source,file_type_source_value,file_remote_source_url
-FROM person INNER JOIN sequencing
-WHERE file_type_source_value = "Counts"')
 ```
 
+####Raw SQLite query:
+```{r demoSQLQuery,echo=TRUE}
+dbGetQuery(omop_db,
+'SELECT person_source_value, person.person_id,file_remote_repo_id,file_remote_repo_value
+ FROM person INNER JOIN sequencing 
+ WHERE file_remote_repo_id IS NOT NULL and person_source_value is "tcga-3c-aaau" 
+ ORDER BY "file_remote_repo_value"') %>%
+  kable() %>%
+  kable_styling(full_width=FALSE) 
+```
+
+####DBplyr query:
+```{r demoSQLQueryDBPlyr,echo=TRUE}
+inner_join(tbl(omop_db,"PERSON"),
+           tbl(omop_db,"MEASUREMENT")) %>%
+  select(person_source_value,
+         birth_datetime,
+         death_datetime,
+         measurement_source_value,
+         value_as_number,
+         unit_source_value) %>%
+  filter(charindex("lymph",measurement_source_value),
+         !is.null(death_datetime)) %>%
+  as_tibble() %>%
+  kable() %>%
+  kable_styling(full_width=FALSE)
+```
+
+#TL;DR:
+```
+library(ROMOPOmics)
+
+dm          <- loadDataModel(master_table_file = dm_file)
+msks        <- loadModelMasks(mask_file_directory = dirs$masks)
+omop_inputs <- lapply(names(tcga_files), function(x) readInputFiles(tcga_files[[x]],data_model=dm,mask_table=msks[[x]]))
+db_inputs   <- combineInputTables(input_table_list = omop_inputs)
+omop_db     <- buildSQLDBR(db_inputs,sql_db_file = file.path(dirs$base,"sqlDB.sqlite"))
+```

@@ -56,7 +56,7 @@ combineInputTables  <- function(input_table_list=lapply(seq_input_files,readInpu
     flds      <- col_data %>% filter(table==tb_name,!table_index) %>% select(table_field) %>% unlist(use.names=FALSE)
     tb        <- tb %>%
       group_by_at(flds) %>%
-      mutate(!!as.name(idx_col):=group_indices()) %>%
+      mutate(!!as.name(idx_col):=cur_group_id()) %>%
       select(!!as.name(idx_col),everything()) %>%
       ungroup()
   }

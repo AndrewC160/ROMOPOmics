@@ -28,7 +28,8 @@ readInputFiles    <- function(input_file = input_files[[1]][1],
               merge(.,select(mask_table,table,alias,field,field_idx,set_value),all.x = TRUE, all.y=TRUE) %>%
               as_tibble() %>%
               rename_at(vars(starts_with("V")), function(x) gsub("V",fl_nm,x)) %>%
-              select(table,field,field_idx,alias,set_value,everything())
+              select(table,field,field_idx,alias,set_value,everything()) %>%
+              select_if(function(x) !all(is.na(x)))
 
   #If a set_value was provided, change all corresponding table values to that.
   set_vals<- in_tab %>% select(set_value) %>% unlist(use.names=FALSE)
