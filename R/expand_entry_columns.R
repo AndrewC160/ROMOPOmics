@@ -16,7 +16,7 @@
 
 expand_entry_columns  <- function(table_in){
   #If no index values are provided, just strip the field_index and return.
-  if(all(is.na(table_in$set_value))){return(select(table_in,-field_idx))}
+  if(all(is.na(table_in$field_idx))){return(select(table_in,-field_idx))}
   
   #If index values ARE provided, rbind a duplicate table for each possible set
   # value (if sets 1:3 are present, rbind 3 tables). This maintains each input
@@ -30,6 +30,6 @@ expand_entry_columns  <- function(table_in){
     do.call(rbind,.) %>%
     pivot_wider(id_cols =  c(table,field,alias,set_value),
                 names_from = field_idx,
-                      values_from = col_nms) %>%
+                values_from = col_nms) %>%
     return()
 }
