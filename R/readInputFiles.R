@@ -24,19 +24,22 @@ readInputFiles    <- function(input_file = input_files[[1]][1],
   fl_nm   <- str_match(basename(input_file),"(.+)\\.[ct]sv$")[,2]
   #Merge input file into the full data model.
   in_tab  <- fread(input_file,header = FALSE,stringsAsFactors = FALSE) %>%
-              rename(alias=1) %>%
+              rename_all(function(x) paste0("V",c(0:(length(x)-1)))) %>%
+              rename(alias=V0) %>%
               merge(.,select(mask_table,table,alias,field,field_idx,set_value),all.x = TRUE, all.y=TRUE) %>%
               as_tibble() %>%
               rename_at(vars(starts_with("V")), function(x) gsub("V",fl_nm,x)) %>%
               select(table,field,field_idx,alias,set_value,everything()) %>%
               select_if(function(x) !all(is.na(x)))
 
+  #Sample column names contain the base file name as a prefix.
+  col_nms <- colnames(in_tab)[grep(fl_nm,colnames(in_tab))]
   #If a set_value was provided, change all corresponding table values to that.
   set_vals<- in_tab %>% select(set_value) %>% unlist(use.names=FALSE)
-  in_tab[which(!is.na(set_vals)),colnames(in_tab)[grepl(fl_nm,colnames(in_tab))]] <- set_vals[which(!is.na(set_vals))]
+  in_tab[which(!is.na(set_vals)),col_nms] <- set_vals[which(!is.na(set_vals))]
 
   #Expand duplicated entries into additional columns.
-  out_tab   <- expand_entry_columns(in_tab,col_nms = colnames(in_tab)[grepl(fl_nm,colnames(in_tab))])
+  out_tab   <- expand_entry_columns(table_in = in_tab)
 
   #The "standard table" now is the entire data model with mapped inputs, all
   # unspecified values as NA. Each individual entry is stored in unique column.
@@ -49,3 +52,5 @@ readInputFiles    <- function(input_file = input_files[[1]][1],
     distinct() %>%
     return()
 }
+
+

@@ -1,6 +1,6 @@
 ---
-title: "ROMOPOmics package"
-author: "Andrew"
+title: "OMOPOmics R package: ROMOPOmics"
+author: "NCBI Hackathon Pittsburgh 2019 - Team OMOPOmics"
 date: "5/3/2020"
 output: html_document
 ---
@@ -23,7 +23,11 @@ dirs      <- list()
 dirs$base     <- file.path(here(),"demo")
 dirs$data     <- file.path(dirs$base,"data")
 dirs$masks    <- file.path(dirs$base,"masks")
-#dirs$database <- file.path(dirs$base,"database")
+
+#Files.
+dm_file     <- system.file("extdata","OMOP_CDM_v6_0_custom.csv",package="ROMOPOmics",mustWork = TRUE)
+tcga_files  <- dir(dirs$data,full.names = TRUE)
+names(tcga_files) <- gsub(".csv","",basename(tcga_files))
 
 knitr::opts_chunk$set(echo = FALSE)
 ```
@@ -34,12 +38,10 @@ The purpose of ROMOPOmics is to incorporate the wide variety of sequencing-type 
 
 ![ROMOPOmics diagram](`r file.path(dirs$base,"romopomics_2.0.PNG")`)
 
-#Step 1: Load the OMOP data model, in this case [OMOP 6.0](https://github.com/OHDSI/CommonDataModel/blob/master/OMOP_CDM_v6_0.csv).
+#Step 1: Load the OMOP data model.
 
-> `loadDataModel()` can return the data model as a single table or as a list of OMOP tables.
-
+This package has been designed with the OMOP [OMOP 6.0](https://github.com/OHDSI/CommonDataModel/blob/master/OMOP_CDM_v6_0.csv) framework in mind,  though it should be compatible with custom models as well. Unless a custom data model is provided, the package defaults to opening a custom version of the OMOP 6.0 data model which is packaged with it in `extdata`.
 ```{r loadDataModel,echo=TRUE}
-dm_file <- system.file("extdata","OMOP_CDM_v6_0_custom.csv",package="ROMOPOmics",mustWork = TRUE)
 dm      <- loadDataModel(as_table_list = FALSE,master_table_file = dm_file)
 ```
 
@@ -103,9 +105,6 @@ msks$brca_mutation %>%
 Using the `readInputFiles()` function, data table inputs are translated into the OMOP format according to the provided `mask` (in this case `brca_clinical` and `brca_mutation`). Tables in this format are "exhaustive" in that they include all possible fields and tables in the data model, including unused ones.
 
 ```{r saveMasks,echo=TRUE,message=FALSE}
-tcga_files  <- dir(dirs$data,full.names = TRUE)
-names(tcga_files) <- gsub(".csv","",basename(tcga_files))
-
 omop_inputs <- lapply(names(tcga_files), function(x) readInputFiles(tcga_files[[x]],data_model=dm,mask_table=msks[[x]]))
 ```
 
@@ -161,8 +160,10 @@ inner_join(tbl(omop_db,"PERSON"),
 #TL;DR:
 ```
 library(ROMOPOmics)
-
+dm_file     <- system.file("extdata","OMOP_CDM_v6_0_custom.csv",package="ROMOPOmics",mustWork = TRUE)
 dm          <- loadDataModel(master_table_file = dm_file)
+tcga_files  <- dir(dirs$data,full.names = TRUE)
+names(tcga_files) <- gsub(".csv","",basename(tcga_files))
 msks        <- loadModelMasks(mask_file_directory = dirs$masks)
 omop_inputs <- lapply(names(tcga_files), function(x) readInputFiles(tcga_files[[x]],data_model=dm,mask_table=msks[[x]]))
 db_inputs   <- combineInputTables(input_table_list = omop_inputs)
