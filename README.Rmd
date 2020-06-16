@@ -153,6 +153,7 @@ dbGetQuery(omop_db,
   kable_styling(full_width=FALSE) 
 ```
 
+
 ####DBplyr query:
 ```{r demoSQLQueryDBPlyr,echo=TRUE,eval=TRUE}
 inner_join(tbl(omop_db,"PERSON"),
@@ -170,6 +171,7 @@ inner_join(tbl(omop_db,"PERSON"),
   kable() %>%
   kable_styling(full_width=FALSE)
 ```
+
 
 #TL;DR:
 ```
