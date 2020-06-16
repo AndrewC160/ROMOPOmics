@@ -43,7 +43,7 @@ knitr::opts_chunk$set(echo = FALSE)
 
 The purpose of ROMOPOmics is to incorporate the wide variety of sequencing-type data sets, including all pipeline by byproducts (alignment files, raw reads, readmes, etc.) as well as pipeline products of any type (gene counts, differential expression data, quality control analyses, etc.), into an SQL-friendly database that is easily accessed by users. The package should be a quick installation that allows users to specify a data directory and a mask file describing how to map that data's fields into the data model, and will return tables formatted for SQLite incorporation.
 
-![ROMOPOmics diagram](`r file.path(find_root(criterion = criteria$is_r_package),"man/figures/romopomics_2.0.PNG")`)
+![ROMOPOmics diagram](man/figures/romopomics_2.0.PNG)
 
 #Step 1: Load the OMOP data model.
 
