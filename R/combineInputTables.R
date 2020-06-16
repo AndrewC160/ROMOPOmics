@@ -17,17 +17,17 @@
 #'
 #' @export
 
-combineInputTables  <- function(input_table_list=lapply(seq_input_files,readInputFiles)){
+combineInputTables  <- function(input_table_list){
   #Combine entire list of input tables since they should be identically
   # formatted now, just with different NA columns. Function assumes all data
   # sets are here at this point, including all mask types, for indexing
   # purposes.
 
   #Reference that includes ALL columns, including IDs and fields with identical names.
-  #full_tb   <- as_tibble(do.call(merge,input_table_list)) %>%
-   #             mutate(table_field = paste(table,field,sep="|"))
-  full_tb   <- Reduce(merge,input_table_list) %>%
-                 mutate(table_field = paste(table,field,sep="|"))
+  full_tb   <- Reduce(function(x,y) merge(x,y,all=TRUE),input_table_list) %>%
+                as_tibble() %>%
+                mutate(table_field = paste(table,field,sep="|")) %>%
+                select(table_field,everything())
   #Figure out used OMOP tables (those with any input fields).
   used_tbs  <- full_tb %>%
                 select(-field,-required,-type,-description,-table_index,-table_field) %>%
@@ -50,8 +50,7 @@ combineInputTables  <- function(input_table_list=lapply(seq_input_files,readInpu
                 as.matrix() %>% t() %>%
                 as_tibble(.name_repair = "minimal")
   colnames(tb)<- cn
-  tbl_names <- unique(col_data$table)
-  for(tb_name in rev(tbl_names)){
+  for(tb_name in rev(used_tbs)){
     idx_col   <- paste0(tb_name,"|",tolower(tb_name),"_id")
     flds      <- col_data %>% filter(table==tb_name,!table_index) %>% select(table_field) %>% unlist(use.names=FALSE)
     tb        <- tb %>%
@@ -62,9 +61,9 @@ combineInputTables  <- function(input_table_list=lapply(seq_input_files,readInpu
   }
 
   #Return a list of formatted OMOP tables.
-  tbl_lst      <- vector(mode = "list",length = length(tbl_names))
-  names(tbl_lst) <- tbl_names
-  for(tb_name in rev(tbl_names)){
+  tbl_lst      <- vector(mode = "list",length = length(used_tbs))
+  names(tbl_lst) <- used_tbs
+  for(tb_name in rev(used_tbs)){
     cd        <- filter(col_data,table==tb_name) %>%
                   arrange(!table_index)
     all_cols  <- filter(cd,!table_index) %>% select(table_field) %>% unlist(use.names=FALSE)
@@ -72,7 +71,7 @@ combineInputTables  <- function(input_table_list=lapply(seq_input_files,readInpu
     col_types <- interpret_class(cd$type)
     names(col_types)  <- cd$table_field
     tb_out    <- select(tb,ends_with(idx_cols),all_cols)
-x <- list()
+    x <- list()
     for(i in all_cols){
       #class(tb_out[[i]])<- interpret_class(filter(cd,table_field==i) %>% select(type) %>% unlist())
       x <-  c(x,interpret_class(filter(cd,table_field==i) %>% select(type) %>% unlist()))

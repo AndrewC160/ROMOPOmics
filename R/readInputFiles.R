@@ -17,9 +17,7 @@
 #'
 #' @export
 
-readInputFiles    <- function(input_file = input_files[[1]][1],
-                              data_model = dm,
-                              mask_table = msks$brca_mutation){
+readInputFiles    <- function(input_file,data_model,mask_table){
   #Get file names to append to each column.
   fl_nm   <- str_match(basename(input_file),"(.+)\\.[ct]sv$")[,2]
   #Merge input file into the full data model.
@@ -30,6 +28,7 @@ readInputFiles    <- function(input_file = input_files[[1]][1],
               as_tibble() %>%
               rename_at(vars(starts_with("V")), function(x) gsub("V",fl_nm,x)) %>%
               select(table,field,field_idx,alias,set_value,everything()) %>%
+              mutate_all(function(x) ifelse(x=="",NA,x)) %>%
               select_if(function(x) !all(is.na(x)))
 
   #Sample column names contain the base file name as a prefix.
@@ -44,11 +43,10 @@ readInputFiles    <- function(input_file = input_files[[1]][1],
   #The "standard table" now is the entire data model with mapped inputs, all
   # unspecified values as NA. Each individual entry is stored in unique column.
   data_model %>%
-    select(field,table,required,type,description,table_index) %>% #Only keep standard cols.
+    select(table,field,required,type,description,table_index) %>% #Only keep standard cols.
     mutate(table=toupper(table)) %>%
     merge(out_tab,all=TRUE) %>%
     as_tibble() %>%
-    mutate_all(function(x) ifelse(x=="",NA,x)) %>%
     distinct() %>%
     return()
 }

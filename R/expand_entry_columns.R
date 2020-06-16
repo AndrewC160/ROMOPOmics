@@ -28,7 +28,7 @@ expand_entry_columns  <- function(table_in){
       mutate(field_idx = x)}
     ) %>%
     do.call(rbind,.) %>%
-    pivot_wider(id_cols =  c(table,field,alias,set_value),
+    pivot_wider(id_cols =  c(table,field),
                 names_from = field_idx,
                 values_from = col_nms) %>%
     return()
