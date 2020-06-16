@@ -1,5 +1,6 @@
 ---
 title: "ROMOPOmics - An OMOPOmics R package"
+date: June 16, 2020
 output: github_document
 ---
 
@@ -7,9 +8,11 @@ output: github_document
 library(tidyverse)
 library(dbplyr)
 library(data.table)
+library(rmarkdown)
 library(knitr)
 library(kableExtra)
-library(here)
+#library(here)
+library(rprojroot)
 library(RSQLite)
 library(ROMOPOmics)
 knitr::opts_chunk$set(echo = TRUE)
@@ -19,8 +22,10 @@ dirs          <- list()
 #dirs$base <- ifelse(interactive(),
 #                    file.path(here(),
 #                    file.path(here(),"demo"))
-dirs$base     <- file.path(here())
+#dirs$base     <- here()
+dirs$base     <- file.path(find_root(criterion = criteria$is_r_package))
 dirs$data     <- file.path(dirs$base,"data")
+dirs$demo     <- file.path(dirs$base,"demo")
 dirs$masks    <- file.path(dirs$base,"masks")
 
 #Files.
