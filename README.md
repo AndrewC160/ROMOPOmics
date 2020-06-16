@@ -9,8 +9,8 @@ The purpose of ROMOPOmics is to incorporate the wide variety of sequencing-type 
 
 ![ROMOPOmics diagram](man/figures/romopomics_2.0.PNG)
 
-Step 1: Load the OMOP data model.
-=================================
+Step 1: Load the data model.
+============================
 
 This package has been designed with the OMOP [OMOP 6.0](https://github.com/OHDSI/CommonDataModel/blob/master/OMOP_CDM_v6_0.csv) framework in mind, though it should be compatible with custom models as well. Unless a custom data model is provided, the package defaults to opening a custom version of the OMOP 6.0 data model which is packaged with it in `extdata`.
 
@@ -385,8 +385,8 @@ sequencing
 </table>
 This table inherits from `PERSON` and `SPECIMEN`. The reasons for including this table are two fold: First, sequencing data is excedingly common in contemporary research, and is increasingly common in personalized medicine techniques. Second, to be truly useful "Sequencing" data should be able to incorporate the spectrum of products along the testing pipeline, from library preparation to sequencing to data analysis. This will allow for intermediate steps and files to be used (getting and using raw files rather than the gene counts, for example). But crucially, this will facilitate comparisons using data sets between different studies, which must account for differences in library preparation, quality control, alignment methods, reference data, etc. Including this data should make this easier, but incorporating this variety of variables is not intuitive in the existing OMOP model.
 
-Step 2: Design and load input masks to translate database values into OMOP fields and tables.
-=============================================================================================
+Step 2: Design and load input masks.
+====================================
 
 ``` r
 msks  <- loadModelMasks(mask_file_directory = dirs$masks)
@@ -394,31 +394,569 @@ msks  <- loadModelMasks(mask_file_directory = dirs$masks)
 
 "Masks" are designed to streamline the addition of existing data sets to OMOP format, or at least to how the *admin* thinks these data sets should be incorporated. The mask file provides `table`, `alias`, and `field` columns, which describe each term's OMOP table, its name within the user's input file, and its name within the standard OMOP field, respectively. For instance, `patient_name` in the user's database will likely map to `person_source_value` in current OMOP parlance. Using multiple masks should streamline the use of multiple analysis types as well: the database administrators can develop and implement masks and users won't need to know that `patient_name` and `cell_line_name` are both synonymous with `person_source_value` in the OMOP framework, for instance. Thus "Sequencing" data can be added using the `sequencing` mask, while "HLA"" data can be incorporated using an `hla` mask. Here's an example of a mask formatted [TCGA](https://www.cancer.gov/about-nci/organization/ccg/research/structural-genomics/tcga) clinical data, provided to the `loadModelMasks()` function as a CSV:
 
+<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;font-style: italic;font-size: 20px;">
+alias
+</th>
+<th style="text-align:left;font-style: italic;font-size: 20px;">
+table
+</th>
+<th style="text-align:left;font-style: italic;font-size: 20px;">
+field
+</th>
+<th style="text-align:left;font-style: italic;font-size: 20px;">
+field\_idx
+</th>
+<th style="text-align:left;font-style: italic;font-size: 20px;">
+set\_value
+</th>
+<th style="text-align:left;font-style: italic;font-size: 20px;">
+example
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;color: black !important;background-color: lightgray !important;border-left:1px solid;border-right:1px solid;">
+bcr patient barcode
+</td>
+<td style="text-align:left;color: black !important;font-weight: bold;">
+PERSON
+</td>
+<td style="text-align:left;color: black !important;">
+person source value
+</td>
+<td style="text-align:left;color: gray !important;">
+</td>
+<td style="text-align:left;color: gray !important;">
+</td>
+<td style="text-align:left;">
+tcga-3c-aaau
+</td>
+</tr>
+<tr>
+<td style="text-align:left;color: black !important;background-color: lightgray !important;border-left:1px solid;border-right:1px solid;">
+bcr
+</td>
+<td style="text-align:left;color: black !important;font-weight: bold;">
+PROVIDER
+</td>
+<td style="text-align:left;color: black !important;">
+care site id
+</td>
+<td style="text-align:left;color: gray !important;">
+</td>
+<td style="text-align:left;color: gray !important;">
+</td>
+<td style="text-align:left;">
+nationwide children's hospital
+</td>
+</tr>
+<tr>
+<td style="text-align:left;color: black !important;background-color: lightgray !important;border-left:1px solid;border-right:1px solid;">
+file uuid
+</td>
+<td style="text-align:left;color: black !important;font-weight: bold;">
+PROVIDER
+</td>
+<td style="text-align:left;color: black !important;">
+file remote repo id
+</td>
+<td style="text-align:left;color: gray !important;">
+</td>
+<td style="text-align:left;color: gray !important;">
+</td>
+<td style="text-align:left;">
+31548443-603d-49d3-ab80-945e3867dd9f
+</td>
+</tr>
+<tr>
+<td style="text-align:left;color: black !important;background-color: lightgray !important;border-left:1px solid;border-right:1px solid;">
+project code
+</td>
+<td style="text-align:left;color: black !important;font-weight: bold;">
+COHORT
+</td>
+<td style="text-align:left;color: black !important;">
+cohort definition id
+</td>
+<td style="text-align:left;color: gray !important;">
+</td>
+<td style="text-align:left;color: gray !important;">
+</td>
+<td style="text-align:left;">
+tcga
+</td>
+</tr>
+<tr>
+<td style="text-align:left;color: black !important;background-color: lightgray !important;border-left:1px solid;border-right:1px solid;">
+age at initial pathologic diagnosis desc
+</td>
+<td style="text-align:left;color: black !important;font-weight: bold;">
+OBSERVATION
+</td>
+<td style="text-align:left;color: black !important;">
+observation source value
+</td>
+<td style="text-align:left;color: gray !important;">
+1
+</td>
+<td style="text-align:left;color: gray !important;">
+age at initial diagnosis
+</td>
+<td style="text-align:left;">
+age at initial diagnosis
+</td>
+</tr>
+<tr>
+<td style="text-align:left;color: black !important;background-color: lightgray !important;border-left:1px solid;border-right:1px solid;">
+age at initial pathologic diagnosis
+</td>
+<td style="text-align:left;color: black !important;font-weight: bold;">
+OBSERVATION
+</td>
+<td style="text-align:left;color: black !important;">
+value as number
+</td>
+<td style="text-align:left;color: gray !important;">
+1
+</td>
+<td style="text-align:left;color: gray !important;">
+</td>
+<td style="text-align:left;">
+55
+</td>
+</tr>
+<tr>
+<td style="text-align:left;color: black !important;background-color: lightgray !important;border-left:1px solid;border-right:1px solid;">
+age at initial pathologic diagnosis unit
+</td>
+<td style="text-align:left;color: black !important;font-weight: bold;">
+OBSERVATION
+</td>
+<td style="text-align:left;color: black !important;">
+unit source value
+</td>
+<td style="text-align:left;color: gray !important;">
+1
+</td>
+<td style="text-align:left;color: gray !important;">
+years
+</td>
+<td style="text-align:left;">
+years
+</td>
+</tr>
+<tr>
+<td style="text-align:left;color: black !important;background-color: lightgray !important;border-left:1px solid;border-right:1px solid;">
+anatomic neoplasm subdivisions anatomic neoplasm subdivision
+</td>
+<td style="text-align:left;color: black !important;font-weight: bold;">
+SPECIMEN
+</td>
+<td style="text-align:left;color: black !important;">
+anatomic site source value
+</td>
+<td style="text-align:left;color: gray !important;">
+</td>
+<td style="text-align:left;color: gray !important;">
+</td>
+<td style="text-align:left;">
+left lower outer quadrant
+</td>
+</tr>
+<tr>
+<td style="text-align:left;color: black !important;background-color: lightgray !important;border-left:1px solid;border-right:1px solid;">
+bcr patient uuid
+</td>
+<td style="text-align:left;color: black !important;font-weight: bold;">
+SPECIMEN
+</td>
+<td style="text-align:left;color: black !important;">
+specimen source id
+</td>
+<td style="text-align:left;color: gray !important;">
+</td>
+<td style="text-align:left;color: gray !important;">
+</td>
+<td style="text-align:left;">
+6e7d5ec6-a469-467c-b748-237353c23416
+</td>
+</tr>
+<tr>
+<td style="text-align:left;color: black !important;background-color: lightgray !important;border-left:1px solid;border-right:1px solid;">
+biospecimen cqcf tumor samples tumor sample tumor necrosis percent desc
+</td>
+<td style="text-align:left;color: black !important;font-weight: bold;">
+MEASUREMENT
+</td>
+<td style="text-align:left;color: black !important;">
+measurement source value
+</td>
+<td style="text-align:left;color: gray !important;">
+1
+</td>
+<td style="text-align:left;color: gray !important;">
+CQCF tumor necrosis percentage
+</td>
+<td style="text-align:left;">
+CQCF tumor necrosis percentage
+</td>
+</tr>
+<tr>
+<td style="text-align:left;color: black !important;background-color: lightgray !important;border-left:1px solid;border-right:1px solid;">
+biospecimen cqcf tumor samples tumor sample tumor necrosis percent
+</td>
+<td style="text-align:left;color: black !important;font-weight: bold;">
+MEASUREMENT
+</td>
+<td style="text-align:left;color: black !important;">
+value as number
+</td>
+<td style="text-align:left;color: gray !important;">
+1
+</td>
+<td style="text-align:left;color: gray !important;">
+</td>
+<td style="text-align:left;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;color: black !important;background-color: lightgray !important;border-left:1px solid;border-right:1px solid;">
+biospecimen cqcf tumor samples tumor sample tumor necrosis percent unit
+</td>
+<td style="text-align:left;color: black !important;font-weight: bold;">
+MEASUREMENT
+</td>
+<td style="text-align:left;color: black !important;">
+unit source value
+</td>
+<td style="text-align:left;color: gray !important;">
+1
+</td>
+<td style="text-align:left;color: gray !important;">
+percent
+</td>
+<td style="text-align:left;">
+percent
+</td>
+</tr>
+<tr>
+<td style="text-align:left;color: black !important;background-color: lightgray !important;border-left:1px solid;border-right:1px solid;">
+date of birth
+</td>
+<td style="text-align:left;color: black !important;font-weight: bold;">
+PERSON
+</td>
+<td style="text-align:left;color: black !important;">
+birth datetime
+</td>
+<td style="text-align:left;color: gray !important;">
+</td>
+<td style="text-align:left;color: gray !important;">
+</td>
+<td style="text-align:left;">
+7/14/1959
+</td>
+</tr>
+<tr>
+<td style="text-align:left;color: black !important;background-color: lightgray !important;border-left:1px solid;border-right:1px solid;">
+date of death
+</td>
+<td style="text-align:left;color: black !important;font-weight: bold;">
+PERSON
+</td>
+<td style="text-align:left;color: black !important;">
+death datetime
+</td>
+<td style="text-align:left;color: gray !important;">
+</td>
+<td style="text-align:left;color: gray !important;">
+</td>
+<td style="text-align:left;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;color: black !important;background-color: lightgray !important;border-left:1px solid;border-right:1px solid;">
+date of treatment
+</td>
+<td style="text-align:left;color: black !important;font-weight: bold;">
+SPECIMEN
+</td>
+<td style="text-align:left;color: black !important;">
+specimen datetime
+</td>
+<td style="text-align:left;color: gray !important;">
+</td>
+<td style="text-align:left;color: gray !important;">
+</td>
+<td style="text-align:left;">
+11/13/2014
+</td>
+</tr>
+<tr>
+<td style="text-align:left;color: black !important;background-color: lightgray !important;border-left:1px solid;border-right:1px solid;">
+ethnicity
+</td>
+<td style="text-align:left;color: black !important;font-weight: bold;">
+PERSON
+</td>
+<td style="text-align:left;color: black !important;">
+ethnicity source concept id
+</td>
+<td style="text-align:left;color: gray !important;">
+</td>
+<td style="text-align:left;color: gray !important;">
+</td>
+<td style="text-align:left;">
+not hispanic or latino
+</td>
+</tr>
+<tr>
+<td style="text-align:left;color: black !important;background-color: lightgray !important;border-left:1px solid;border-right:1px solid;">
+gender
+</td>
+<td style="text-align:left;color: black !important;font-weight: bold;">
+PERSON
+</td>
+<td style="text-align:left;color: black !important;">
+gender source value
+</td>
+<td style="text-align:left;color: gray !important;">
+</td>
+<td style="text-align:left;color: gray !important;">
+</td>
+<td style="text-align:left;">
+female
+</td>
+</tr>
+<tr>
+<td style="text-align:left;color: black !important;background-color: lightgray !important;border-left:1px solid;border-right:1px solid;">
+lymph node examined count desc
+</td>
+<td style="text-align:left;color: black !important;font-weight: bold;">
+MEASUREMENT
+</td>
+<td style="text-align:left;color: black !important;">
+measurement source value
+</td>
+<td style="text-align:left;color: gray !important;">
+2
+</td>
+<td style="text-align:left;color: gray !important;">
+lymph nodes examined
+</td>
+<td style="text-align:left;">
+lymph nodes examined
+</td>
+</tr>
+<tr>
+<td style="text-align:left;color: black !important;background-color: lightgray !important;border-left:1px solid;border-right:1px solid;">
+lymph node examined count
+</td>
+<td style="text-align:left;color: black !important;font-weight: bold;">
+MEASUREMENT
+</td>
+<td style="text-align:left;color: black !important;">
+value as number
+</td>
+<td style="text-align:left;color: gray !important;">
+2
+</td>
+<td style="text-align:left;color: gray !important;">
+</td>
+<td style="text-align:left;">
+13
+</td>
+</tr>
+<tr>
+<td style="text-align:left;color: black !important;background-color: lightgray !important;border-left:1px solid;border-right:1px solid;">
+lymph node examined count unit
+</td>
+<td style="text-align:left;color: black !important;font-weight: bold;">
+MEASUREMENT
+</td>
+<td style="text-align:left;color: black !important;">
+unit source value
+</td>
+<td style="text-align:left;color: gray !important;">
+2
+</td>
+<td style="text-align:left;color: gray !important;">
+nodes
+</td>
+<td style="text-align:left;">
+nodes
+</td>
+</tr>
+<tr>
+<td style="text-align:left;color: black !important;background-color: lightgray !important;border-left:1px solid;border-right:1px solid;">
+lymph node count date
+</td>
+<td style="text-align:left;color: black !important;font-weight: bold;">
+MEASUREMENT
+</td>
+<td style="text-align:left;color: black !important;">
+measurement datetime
+</td>
+<td style="text-align:left;color: gray !important;">
+2
+</td>
+<td style="text-align:left;color: gray !important;">
+</td>
+<td style="text-align:left;">
+6/19/2004
+</td>
+</tr>
+<tr>
+<td style="text-align:left;color: black !important;background-color: lightgray !important;border-left:1px solid;border-right:1px solid;">
+lymphnodes he
+</td>
+<td style="text-align:left;color: black !important;font-weight: bold;">
+MEASUREMENT
+</td>
+<td style="text-align:left;color: black !important;">
+measurement source value
+</td>
+<td style="text-align:left;color: gray !important;">
+3
+</td>
+<td style="text-align:left;color: gray !important;">
+lymph node he
+</td>
+<td style="text-align:left;">
+lymph node he
+</td>
+</tr>
+<tr>
+<td style="text-align:left;color: black !important;background-color: lightgray !important;border-left:1px solid;border-right:1px solid;">
+number of lymphnodes positive by he
+</td>
+<td style="text-align:left;color: black !important;font-weight: bold;">
+MEASUREMENT
+</td>
+<td style="text-align:left;color: black !important;">
+value as number
+</td>
+<td style="text-align:left;color: gray !important;">
+3
+</td>
+<td style="text-align:left;color: gray !important;">
+</td>
+<td style="text-align:left;">
+4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;color: black !important;background-color: lightgray !important;border-left:1px solid;border-right:1px solid;">
+number of lymphnodes positive by he unit
+</td>
+<td style="text-align:left;color: black !important;font-weight: bold;">
+MEASUREMENT
+</td>
+<td style="text-align:left;color: black !important;">
+unit source value
+</td>
+<td style="text-align:left;color: gray !important;">
+3
+</td>
+<td style="text-align:left;color: gray !important;">
+nodes
+</td>
+<td style="text-align:left;">
+nodes
+</td>
+</tr>
+<tr>
+<td style="text-align:left;color: black !important;background-color: lightgray !important;border-left:1px solid;border-right:1px solid;">
+lymphnodes ihc
+</td>
+<td style="text-align:left;color: black !important;font-weight: bold;">
+MEASUREMENT
+</td>
+<td style="text-align:left;color: black !important;">
+measurement source value
+</td>
+<td style="text-align:left;color: gray !important;">
+4
+</td>
+<td style="text-align:left;color: gray !important;">
+lymph node ihc
+</td>
+<td style="text-align:left;">
+lympth node ihc
+</td>
+</tr>
+<tr>
+<td style="text-align:left;color: black !important;background-color: lightgray !important;border-left:1px solid;border-right:1px solid;">
+number of lymphnodes positive by ihc
+</td>
+<td style="text-align:left;color: black !important;font-weight: bold;">
+MEASUREMENT
+</td>
+<td style="text-align:left;color: black !important;">
+value as number
+</td>
+<td style="text-align:left;color: gray !important;">
+4
+</td>
+<td style="text-align:left;color: gray !important;">
+</td>
+<td style="text-align:left;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;color: black !important;background-color: lightgray !important;border-left:1px solid;border-right:1px solid;">
+number of lymphnodes positive by ihc unit
+</td>
+<td style="text-align:left;color: black !important;font-weight: bold;">
+MEASUREMENT
+</td>
+<td style="text-align:left;color: black !important;">
+unit source value
+</td>
+<td style="text-align:left;color: gray !important;">
+4
+</td>
+<td style="text-align:left;color: gray !important;">
+nodes
+</td>
+<td style="text-align:left;">
+nodes
+</td>
+</tr>
+</tbody>
+</table>
 #### **Column names**
 
--   **alias**: Field name for a value according to the input dataset.
+> -   **alias**: Field name for a value according to the input dataset.
+>
+> -   **field**: Field name for a value according to the selected data model.
+>
+> -   **table**: Table name for a value according to the selected data model.
+>
+> -   **field\_idx**: Since OMOP format anticipates a one-column-per-treatment/observation/measurement format, appending a value here other than `NA` allows for new columns to be added for each such value. For instance, two inputs can be mapped to `value_as_number` by including a value here and causing each measurement to be added to a separate column. In effect, one column per measurement.
+>
+> -   **set\_value**: Default value that is added to the given table and field regardless of input. Useful for specifying units, descriptions, etc. when facilitating the multiple-column transition.
+>
+""
 
--   **field**: Field name for a value according to the selected data model.
-
--   **table**: Table name for a value according to the selected data model.
-
--   **field\_idx**: Since OMOP format anticipates a one-column-per-treatment/observation/measurement format, appending a value here other than `NA` allows for new columns to be added for each such value. For instance, two inputs can be mapped to `value_as_number` by including a value here and causing each measurement to be added to a separate column. In effect, one column per measurement.
-
--   **set\_value**: Default value that is added to the given table and field regardless of input. Useful for specifying units, descriptions, etc. when facilitating the multiple-column transition.
-
-Step 3: Use masks to translate the input dataset into OMOP format.
-==================================================================
+Step 3: Translate input datasets into data model format.
+========================================================
 
 Using the `readInputFiles()` function, data table inputs are translated into the OMOP format according to the provided `mask` (in this case `brca_clinical` and `brca_mutation`). Tables in this format are "exhaustive" in that they include all possible fields and tables in the data model, including unused ones.
 
 ``` r
 omop_inputs <- lapply(names(tcga_files), function(x) readInputFiles(input_file = tcga_files[[x]],
                                                                     mask_table = msks[[x]],
-                                                                    data_model=dm))
+                                                                    data_model = dm))
 ```
 
-Step 4: Combine all input tables into one set of OMOP tables.
-=============================================================
+Step 4: Combine all input tables into SQL-friendly tables.
+==========================================================
 
 Since tables read via `readInputFiles()` include all fields and tables from the data model, these tables can be combined regardless of input type or mask used using `combineInputTables()`. This function combines all data sets from all mask types, and filters out all OMOP tables from the data model that are unused (no entries in any of the associated fields). Tables are not "partially" used; if any field is included from that table, all fields from that table are included. The only exception to this is table indices: if a table inherits an index from an unused table, that index column is dropped.
 
@@ -430,7 +968,7 @@ db_inputs   <- combineInputTables(input_table_list = omop_inputs)
 
 In this example using these masks, the OMOP tables included are COHORT, MEASUREMENT, OBSERVATION, PERSON, PROVIDER, SEQUENCING, and SPECIMEN.
 
-Step 6: Add OMOP-formatted tables to a database.
+Step 5: Add OMOP-formatted tables to a database.
 ================================================
 
 The tables compiled in `db_inputs` are now formatted for a SQLite database. `Dplyr` has built-in SQLite functionality, which is wrapped in the function `buildSQLDBR()`. However, building a database using any other package is amenable here.
