@@ -89,7 +89,9 @@ msks$brca_clinical %>%
   column_spec(c(4,5),color = "gray")
 ```
 
+
 #### **Column names:**
+
 1. **alias**: Field name for a value according to the input dataset.
 2. **field**: Field name for a value according to the selected data model.
 3. **table**: Table name for a value according to the selected data model.
