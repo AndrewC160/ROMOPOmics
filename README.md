@@ -5,20 +5,14 @@ June 16, 2020
 ROMOPOmics
 ==========
 
-The purpose of ROMOPOmics is to incorporate the wide variety of sequencing-type data sets, including all pipeline by byproducts (alignment files, raw reads, readmes, etc.) as well as pipeline products of any type (gene counts, differential expression data, quality control analyses, etc.), into an SQL-friendly database that is easily accessed by users. The package should be a quick installation that allows users to specify a data directory and a mask file describing how to map that data's fields into the data model, and will return tables formatted for SQLite incorporation.
+The purpose of ROMOPOmics is to incorporate the broad spectrum of data sets resulting from informatics research and precision medicine. In particular, NextGen sequencing data sets including all pipeline byproducts (alignment files, raw reads, readmes, etc.) as well as analysis results of any type (gene counts, differential expression data, quality control analyses, etc.), into an SQL-friendly database that is easily accessed by users. The package should be a quick installation that allows users to specify a data directory and a mask file describing how to map that data's fields into the data model, and will return tables formatted for SQLite incorporation.
 
 ![ROMOPOmics diagram](man/figures/romopomics_2.0.PNG)
 
-Step 1: Load the data model.
-============================
+The custom [OMOP 6.0](https://github.com/OHDSI/CommonDataModel/blob/master/OMOP_CDM_v6_0.csv) data model.
+---------------------------------------------------------------------------------------------------------
 
-This package has been designed with the OMOP [OMOP 6.0](https://github.com/OHDSI/CommonDataModel/blob/master/OMOP_CDM_v6_0.csv) framework in mind, though it should be compatible with custom models as well. Unless a custom data model is provided, the package defaults to opening a custom version of the OMOP 6.0 data model which is packaged with it in `extdata`.
-
-``` r
-dm      <- loadDataModel(as_table_list = FALSE)
-```
-
-This data model is a modified version of the OMOP model downloaded from the [OMOP 6.0 GitHub](https://github.com/OHDSI/CommonDataModel/blob/master/OMOP_CDM_v6_0.csv). This data model includes 448 fields distributed among 39 tables. Unique to this version of the data model is the inclusion of an `hla_source_value` field in the `PERSON` table. Second, our customized version includes a `SEQUENCING` table:
+This package has been designed with the [OMOP 6.0](https://github.com/OHDSI/CommonDataModel/blob/master/OMOP_CDM_v6_0.csv) framework in mind, though it should be compatible with custom models as well. Unless a custom data model is provided, the package defaults to using a custom version of the OMOP 6.0 data model which is packaged with it in `extdata`. This version of the OMOP data model includes 448 fields distributed among 39 tables. Unique to this version is the inclusion of an `hla_source_value` field in the `PERSON` table meant to incorporate [histocompatibility complex types](https://www.merckmanuals.com/professional/immunology-allergic-disorders/biology-of-the-immune-system/human-leukocyte-antigen-hla-system) as a key individual characteristic rather than as a separate observation. Second, our customized version includes a `SEQUENCING` table:
 
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
@@ -383,16 +377,23 @@ sequencing
 </tr>
 </tbody>
 </table>
-This table inherits from `PERSON` and `SPECIMEN`. The reasons for including this table are two fold: First, sequencing data is excedingly common in contemporary research, and is increasingly common in personalized medicine techniques. Second, to be truly useful "Sequencing" data should be able to incorporate the spectrum of products along the testing pipeline, from library preparation to sequencing to data analysis. This will allow for intermediate steps and files to be used (getting and using raw files rather than the gene counts, for example). But crucially, this will facilitate comparisons using data sets between different studies, which must account for differences in library preparation, quality control, alignment methods, reference data, etc. Including this data should make this easier, but incorporating this variety of variables is not intuitive in the existing OMOP model.
+The reasons for including this table are two fold: First, sequencing data is becoming ubiqutious in contemporary research, and is an increasingly common component of personalized medicine treatment regimens. Second, to be truly useful "Sequencing" data sets should include the spectrum of products generated along any testing pipeline, from library preparation to sequencing to data analysis. This allows for intermediate steps and files to be used (getting and using raw files rather than processed and normalized gene counts, for example), but crucially it facilitates comparisons between different studies and treatments by allowing comparisons of library preparation, quality control, alignment methods, reference data, etc. Including this data is crucial, but incorporating this variety of variables is not intuitive in the existing OMOP model.
+
+Step 1: Load the data model.
+============================
+
+``` r
+dm      <- loadDataModel(as_table_list = FALSE)
+```
 
 Step 2: Design and load input masks.
 ====================================
 
 ``` r
-msks  <- loadModelMasks(mask_file_directory = dirs$masks)
+msks    <- loadModelMasks(mask_file_directory = dirs$masks)
 ```
 
-"Masks" are designed to streamline the addition of existing data sets to OMOP format, or at least to how the *admin* thinks these data sets should be incorporated. The mask file provides `table`, `alias`, and `field` columns, which describe each term's OMOP table, its name within the user's input file, and its name within the standard OMOP field, respectively. For instance, `patient_name` in the user's database will likely map to `person_source_value` in current OMOP parlance. Using multiple masks should streamline the use of multiple analysis types as well: the database administrators can develop and implement masks and users won't need to know that `patient_name` and `cell_line_name` are both synonymous with `person_source_value` in the OMOP framework, for instance. Thus "Sequencing" data can be added using the `sequencing` mask, while "HLA"" data can be incorporated using an `hla` mask. Here's an example of a mask formatted [TCGA](https://www.cancer.gov/about-nci/organization/ccg/research/structural-genomics/tcga) clinical data, provided to the `loadModelMasks()` function as a CSV:
+"Masks" streamline the mapping of values from existing data sets to OMOP format, or at least to how the database's *admin* thinks these data sets should be mapped. Mask files are tables which provide `alias`, `table`, and `field` columns that describe each term's name in the input dataset, its destination OMOP table, and name within that table, respectively. For instance, `patient_name` in the user's database will likely map to `person_source_value` in current OMOP parlance. Using multiple masks should streamline the use of multiple analysis types as well: the database administrators can develop and implement masks and users won't need to know that `patient_name` and `cell_line_name` are both synonymous with `person_source_value` in the OMOP framework, for instance. Thus "Sequencing" data can be added using the `sequencing` mask, while "HLA"" data can be incorporated using an `hla` mask. Here's an example of a mask formatted [TCGA](https://www.cancer.gov/about-nci/organization/ccg/research/structural-genomics/tcga) clinical data, provided to the `loadModelMasks()` function as a CSV:
 
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
@@ -930,24 +931,24 @@ nodes
 </tr>
 </tbody>
 </table>
-#### **Column names**
+#### **Column names:**
 
-> -   **alias**: Field name for a value according to the input dataset.
->
-> -   **field**: Field name for a value according to the selected data model.
->
-> -   **table**: Table name for a value according to the selected data model.
->
-> -   **field\_idx**: Since OMOP format anticipates a one-column-per-treatment/observation/measurement format, appending a value here other than `NA` allows for new columns to be added for each such value. For instance, two inputs can be mapped to `value_as_number` by including a value here and causing each measurement to be added to a separate column. In effect, one column per measurement.
->
-> -   **set\_value**: Default value that is added to the given table and field regardless of input. Useful for specifying units, descriptions, etc. when facilitating the multiple-column transition.
->
-""
+1.  **alias**: Field name for a value according to the input dataset.
+2.  **field**: Field name for a value according to the selected data model.
+3.  **table**: Table name for a value according to the selected data model.
+4.  **field\_idx**: Used to differentiate between observations (see below).
+5.  **set\_value**: Default value that is added to the given table and field regardless of input. Useful for specifying units, descriptions, etc. when facilitating the multiple-column transition.
+
+#### Patient vs. observation-centric datasets
+
+The OMOP format anticipates data tables with one column per treatment/observation/measurement, while many datasets are formatted with one column per patient. Appending a `field_idx` value allows for observations to be "grouped" into an observation complete with their units, descriptions, etc. As an example, consider this translation of a simple input dataset with two descriptors and two observations:
+
+![](man/figures/patient_to_observation_centric.PNG)
 
 Step 3: Translate input datasets into data model format.
 ========================================================
 
-Using the `readInputFiles()` function, data table inputs are translated into the OMOP format according to the provided `mask` (in this case `brca_clinical` and `brca_mutation`). Tables in this format are "exhaustive" in that they include all possible fields and tables in the data model, including unused ones.
+Using the `readInputFiles()` function, data table inputs are translated into the destination format according to the provided `mask` (in this case `brca_clinical` and `brca_mutation`). Tables in this format are "exhaustive" in that they include all possible fields and tables in the data model, including unused ones.
 
 ``` r
 omop_inputs <- lapply(names(tcga_files), function(x) readInputFiles(input_file = tcga_files[[x]],
