@@ -21,11 +21,6 @@ brca_clinical_dt_wide <-
 # the above is in wide format and I'd like to make it long 
 # so we can revise the column names to remove the periods
 
-brca_clinical_dt_wide[,.(admin.file_uuid,
-                         patient.biospecimen.cqcf.normal.controls.normal.control.bcr_sample_uuid,
-                         patient.bcr_patient_barcode,
-                         patient.bcr_patient_uuid)]
-
 brca_clinical_dt_long <- 
   brca_clinical_dt_wide %>% 
   melt(id.vars=c("patient.bcr_patient_barcode")) %>% 
