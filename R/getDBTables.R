@@ -14,7 +14,7 @@
 #'
 #' getDBTables()
 #'
-#' @import tibble
+#' @import tidyverse
 #' @import DBI
 #' @import data.table
 #' @import RSQLite

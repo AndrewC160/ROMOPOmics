@@ -6,9 +6,8 @@
 #'
 #' interpret_class
 #'
-#' @import tibble
 #' @import data.table
-#' @import magrittr
+#' @import tidyverse
 #'
 #' @export
 

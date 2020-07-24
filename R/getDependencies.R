@@ -10,7 +10,7 @@
 #'
 #' getDependencies()
 #'
-#' @import tibble
+#' @import tidyverse
 #'
 
 getDependencies   <- function(data_model=loadDataModel(),inc_tabs,return_matrix=FALSE){
