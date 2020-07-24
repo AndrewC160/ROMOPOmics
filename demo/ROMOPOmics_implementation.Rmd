@@ -51,7 +51,7 @@ This data model is a modified version of the OMOP model downloaded from the [OMO
 dm %>% 
   filter(table=="sequencing") %>%
   mutate(description = gsub(" CUSTOM$","",description)) %>%
-  select(-table_index) %>%
+  dplyr::select(-table_index) %>%
   kable() %>%
   kable_styling(full_width=FALSE)
 ```
@@ -67,7 +67,7 @@ msks  <- loadModelMasks(mask_file_directory = dirs$masks)
 
 ```{r previewClinicalMask,echo=FALSE}
 msks$brca_clinical %>%
-  select(alias,table,field,field_idx,set_value,example1) %>%
+  dplyr::select(alias,table,field,field_idx,set_value,example1) %>%
   mutate_all(function(x) ifelse(is.na(x),"",x)) %>%
   rename(example=example1) %>%
   kable() %>%
@@ -93,7 +93,7 @@ msks$brca_clinical %>%
   
 ```{r previewMutationngMask,echo=FALSE,eval=FALSE}
 msks$brca_mutation %>%
-  select(alias,everything()) %>%
+  dplyr::select(alias,everything()) %>%
   kable() %>%
   kable_styling(full_width = FALSE) %>%
   column_spec(c(1:3),color="black") %>%
@@ -144,7 +144,7 @@ dbGetQuery(omop_db,
 ```{r demoSQLQueryDBPlyr,echo=TRUE}
 inner_join(tbl(omop_db,"PERSON"),
            tbl(omop_db,"MEASUREMENT")) %>%
-  select(person_source_value,
+  dplyr::select(person_source_value,
          birth_datetime,
          death_datetime,
          measurement_source_value,

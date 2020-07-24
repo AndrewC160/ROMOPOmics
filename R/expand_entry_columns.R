@@ -9,7 +9,6 @@
 #' 
 #' expand_entry_columns()
 #' 
-#' @import magrittr
 #' @import tidyverse
 #' 
 #' @export

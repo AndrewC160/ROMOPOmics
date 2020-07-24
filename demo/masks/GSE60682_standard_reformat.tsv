@@ -1,0 +1,25 @@
+alias	example1	field	table	field_idx	set_value
+perturbation_type_source_value	activation	condition_source_value	CONDITION_OCCURRENCE	NA	NA
+treatment	control of T cell activation	condition_status_source_value	CONDITION_OCCURRENCE	NA	NA
+time_point	4hrs	route_source_value	DRUG_EXPOSURE	NA	NA
+perturbation_source_value	placebo	drug_source_value	DRUG_EXPOSURE	NA	NA
+perturbation_start_date	4:00:00	drug_exposure_start_datetime	DRUG_EXPOSURE	NA	NA
+perturbation_dose_value_as_number	0	quantity	DRUG_EXPOSURE	NA	NA
+perturbation_dose_unit	ug/mL	dose_unit_source_value	DRUG_EXPOSURE	NA	NA
+patient	100001	person_id	PERSON	NA	NA
+patient_name	Donor1	person_source_value	PERSON	NA	NA
+organism	Homo sapiens	race_source_value	PERSON	NA	NA
+sex	male	gender_source_value	PERSON	NA	NA
+assay_type	Sequencing	specialty_source_value	PROVIDER	NA	NA
+Accession	NA	specialty_source_concept_id	PROVIDER	NA	NA
+ID	11	specimen_id	SEQUENCING	NA	NA
+file_name	Donor1_4hrsControl_Rep1	sequencing_file_description	SEQUENCING	NA	NA
+source	GEO	file_type_source_value	SEQUENCING	NA	NA
+source_id	GSE60682	sequencing_id	SEQUENCING	NA	NA
+assay	ATAC	instrument_source_value	SEQUENCING	NA	NA
+sample_name	GSM1484783	specimen_source_id	SEQUENCING	NA	NA
+local_file_name	data/GSE60682_RAW/GSM1484783_Donor1_4hrsControl_Rep1.bed.gz	file_local_source	SEQUENCING	NA	NA
+reference_genome	hg19	reference_genome_value	SEQUENCING	NA	NA
+source name	"human CD4+ T cells, normal donor, control of T cell activation at 4hrs"	specimen_source_value	SPECIMEN	NA	NA
+disease	healthy	disease_status_source_value	SPECIMEN	NA	NA
+cell_type	CD4+ T cells	anatomic_site_source_value	SPECIMEN	NA	NA
