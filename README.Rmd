@@ -30,7 +30,7 @@ dirs$masks    <- file.path(dirs$demo,"masks")
 
 #Files.
 dm_file     <- system.file("extdata","OMOP_CDM_v6_0_custom.csv",package="ROMOPOmics",mustWork = TRUE)
-tcga_files  <- dir(dirs$data,full.names = TRUE)
+tcga_files  <- dir(dirs$data,full.names = TRUE,pattern="brca")
 names(tcga_files) <- gsub(".csv","",basename(tcga_files))
 
 select <- dplyr::select
