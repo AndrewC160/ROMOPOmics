@@ -1,6 +1,6 @@
 ---
 title: "ROMOPOmics - An OMOPOmics R package"
-date: "23 June, 2020"
+date: "28 July, 2020"
 output:
   html_document:
     toc: true
@@ -13,13 +13,19 @@ output:
 
 # ROMOPOmics
 
-The purpose of ROMOPOmics is to facilitate integration of patient-level clinical data with sample-level 'omics data. Biomedical research datasets such as RNA-Seq experiments or other next generation sequencing datasets contain a mixture of clinical traits of the studied patients including data derived from samples perturbed by different assays, at different timepoints,with varying protocols, and more. Additionally, next generation sequencing datasets include metadata on pipeline byproducts (alignment files, raw reads, readmes, etc.) and analysis results of any type (gene counts, differential expression data, quality control analyses, etc.). Our package ROMOPOmics provides a framework to standardize these datasets and a pipeline to convert this information into a SQL-friendly database that is easily accessed by users. After installation from our github repository, users specify a data directory and a mask file describing how to map their data's fields into a common data model. The resulting standardized data tables are then formatted into a SQLite database for easily interoperating and sharing the dataset.
+## Introduction
+
+
+ROMOPOmics was developed to standardize metadata of high throughput assays to then integrate with associated patient clinical data. Biomedical research datasets such as RNA-Seq experiments or other next generation sequencing datasets contain a mixture of clinical traits of the studied patients including data derived from samples perturbed by different assays, at different timepoints,with varying protocols, and more. Additionally, next generation sequencing datasets include metadata on pipeline byproducts (alignment files, raw reads, readmes, etc.) and analysis results of any type (gene counts, differential expression data, quality control analyses, etc.). Our package ROMOPOmics provides a framework to standardize these datasets and a pipeline to convert this information into a SQL-friendly database that is easily accessed by users. After installation from our github repository, users specify a data directory and a mask file describing how to map their data's fields into a common data model. The resulting standardized data tables are then formatted into a SQLite database for easily interoperating and sharing the dataset.
 
 ![ROMOPOmics diagram](man/figures/romopomics_2.0.PNG)
 
-## Customizing [OMOP 6.0](https://github.com/OHDSI/CommonDataModel/blob/master/OMOP_CDM_v6_0.csv) data model.
 
-The foundation of this package is the [OMOP 6.0](https://github.com/OHDSI/CommonDataModel/blob/master/OMOP_CDM_v6_0.csv) common data model (though it should be compatible with custom models as well). Unless a custom data model is provided, the package defaults to using a custom version of the OMOP 6.0 data model which is packaged within `extdata`. This version of the OMOP data model includes 448 fields distributed among 39 tables. Unique to this version is the inclusion of an `hla_source_value` field in the `PERSON` table meant to incorporate [histocompatibility complex types](https://www.merckmanuals.com/professional/immunology-allergic-disorders/biology-of-the-immune-system/human-leukocyte-antigen-hla-system) as a key individual characteristic rather than as a separate observation. Second, our customized version includes a `SEQUENCING` table: 
+## Background
+
+### [The OMOP common data model](https://www.ohdsi.org/data-standardization/the-common-data-model) 
+
+The CDM allows for standardizing patient clinical data. The foundation of this package is the common data model developed by the Outcomes in Medicine the [OMOP 6.0](https://github.com/OHDSI/CommonDataModel/blob/master/OMOP_CDM_v6_0.csv) common data model (though it should be compatible with custom models as well). The data model contains all the fields and tables for standardizing patient clinical data in the OMOP framework. Unless a custom data model is provided, the package defaults to using a custom version of the OMOP 6.0 data model which is packaged within `extdata`. The OMOP data model includes 448 fields distributed among 39 tables. We use the CDM with a few custom characteristics. First, we include an `hla_source_value` field in the `PERSON` table meant to incorporate [histocompatibility complex types](https://www.merckmanuals.com/professional/immunology-allergic-disorders/biology-of-the-immune-system/human-leukocyte-antigen-hla-system) as a key individual characteristic rather than as a separate observation. Second, our customized version includes a `SEQUENCING` table: 
 
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
  <thead>
@@ -180,6 +186,10 @@ There are two main reasons for including this 'mask' table.
 1) Sequencing data is becoming ubiqutious in contemporary research, and is an increasingly common component of personalized medicine treatment regimens. 
 
 2) Unlocking the full information within next generation experiments behooves these "Sequencing" datasets to include the spectrum of products generated along any testing pipeline, from library preparation to sequencing to data analysis. This allows for intermediate steps and files to be used (getting and using raw files rather than processed and normalized gene counts, for example), but crucially it facilitates comparisons between different studies and treatments by allowing comparisons of library preparation, quality control, alignment methods, reference data, etc.  Including this data is crucial, but incorporating this variety of variables is not intuitive in the existing OMOP model.
+
+# Package functionality
+
+ROMOPomics is a package with 9 functions in total, where 4 are internal functions required by other package functions. We outline the algorithm for using the package below, but this package is very simple. 
 
 # Package algorithm
 
