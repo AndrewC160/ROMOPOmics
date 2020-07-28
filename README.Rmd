@@ -44,16 +44,15 @@ dm <- loadDataModel(as_table_list = FALSE)
 ## Introduction
 
 
-ROMOPOmics was developed to standardize metadata of high throughput assays to then integrate with associated patient clinical data. Biomedical research datasets such as RNA-Seq experiments or other next generation sequencing datasets contain a mixture of clinical traits of the studied patients including data derived from samples perturbed by different assays, at different timepoints,with varying protocols, and more. Additionally, next generation sequencing datasets include metadata on pipeline byproducts (alignment files, raw reads, readmes, etc.) and analysis results of any type (gene counts, differential expression data, quality control analyses, etc.). Our package ROMOPOmics provides a framework to standardize these datasets and a pipeline to convert this information into a SQL-friendly database that is easily accessed by users. After installation from our github repository, users specify a data directory and a mask file describing how to map their data's fields into a common data model. The resulting standardized data tables are then formatted into a SQLite database for easily interoperating and sharing the dataset.
+ROMOPOmics was developed to standardize metadata of high throughput assays with associated patient clinical data. Biomedical research datasets such as RNA-Seq experiments or other next generation sequencing datasets contain a mixture of clinical traits of the studied patients including data derived from samples perturbed by different assays, at different timepoints, with varying protocols, and more. Additionally, next generation sequencing datasets include metadata on pipeline byproducts (alignment files, raw reads, readmes, etc.) and analysis results of any type (gene counts, differential expression data, quality control analyses, etc.). Our package ROMOPOmics provides a framework to standardize these datasets and a pipeline to convert this information into a SQL-friendly database that is easily accessed by users. After installation of our R package from the github repository, users specify a data directory and a mask file describing how to map their data's fields into a common data model. The resulting standardized data tables are then formatted into a SQLite database for easily interoperating and sharing the dataset.
 
 ![ROMOPOmics diagram](man/figures/romopomics_2.0.PNG)
-
 
 ## Background
 
 ### [The OMOP common data model](https://www.ohdsi.org/data-standardization/the-common-data-model) 
 
-The CDM allows for standardizing patient clinical data. The foundation of this package is the common data model developed by the Outcomes in Medicine the [OMOP 6.0](https://github.com/OHDSI/CommonDataModel/blob/master/OMOP_CDM_v6_0.csv) common data model (though it should be compatible with custom models as well). The data model contains all the fields and tables for standardizing patient clinical data in the OMOP framework. Unless a custom data model is provided, the package defaults to using a custom version of the OMOP 6.0 data model which is packaged within `extdata`. The OMOP data model includes `r nrow(dm)` fields distributed among `r length(unique(dm$table))` tables. We use the CDM with a few custom characteristics. First, we include an `hla_source_value` field in the `PERSON` table meant to incorporate [histocompatibility complex types](https://www.merckmanuals.com/professional/immunology-allergic-disorders/biology-of-the-immune-system/human-leukocyte-antigen-hla-system) as a key individual characteristic rather than as a separate observation. Second, our customized version includes a `SEQUENCING` table: 
+The CDM allows for standardizing patient clinical data. The foundation of the ROMOPOmics package is the [common data model](https://github.com/OHDSI/CommonDataModel/blob/master/OMOP_CDM_v6_0.csv) developed by the Observational Medical Outcomes Partnership Medicine and now used by the Observational Health Data Sciences and Informatics network. The data model contains all the fields and tables for standardizing patient clinical data in the OMOP framework. Unless a custom data model is provided, the package defaults to using a custom version of the OMOP 6.0 data model which is packaged within `extdata`. The OMOP data model includes `r nrow(dm)` fields distributed among `r length(unique(dm$table))` tables. We use the CDM with a few custom characteristics. First, we include an `hla_source_value` field in the `PERSON` table meant to incorporate [histocompatibility complex types](https://www.merckmanuals.com/professional/immunology-allergic-disorders/biology-of-the-immune-system/human-leukocyte-antigen-hla-system) as a key individual characteristic rather than as a separate observation. Second, our customized version includes a `SEQUENCING` table: 
 
 ```{r previewCustomOMOP,echo=FALSE}
 dm %>% 
@@ -69,7 +68,7 @@ There are two main reasons for including this 'mask' table.
 
 1) Sequencing data is becoming ubiqutious in contemporary research, and is an increasingly common component of personalized medicine treatment regimens. 
 
-2) Unlocking the full information within next generation experiments behooves these "Sequencing" datasets to include the spectrum of products generated along any testing pipeline, from library preparation to sequencing to data analysis. This allows for intermediate steps and files to be used (getting and using raw files rather than processed and normalized gene counts, for example), but crucially it facilitates comparisons between different studies and treatments by allowing comparisons of library preparation, quality control, alignment methods, reference data, etc.  Including this data is crucial, but incorporating this variety of variables is not intuitive in the existing OMOP model.
+2) Unlocking the full information within next generation experiments behooves these "Sequencing" datasets to include the spectrum of products generated along any testing pipeline, from library preparation to sequencing machine to data analysis. This allows for intermediate steps and files to be used (generating and using raw files rather than processed and normalized gene counts, for example), but crucially it facilitates comparisons between different studies and treatments by allowing comparisons of library preparation, quality control, alignment methods, reference data, etc.  Including this data is crucial, but incorporating the variety of available variables is not intuitive in the existing OMOP model.
 
 # Package functionality
 
@@ -79,7 +78,7 @@ ROMOPomics is a package with 9 functions in total, where 4 are internal function
 
 ## Step 1: Load the data model.
 
-Loads the master common data model file from *extdata* and return the table's information as a data dictionary to be referenced later to standardize the mask data.
+Load the master common data model file from *extdata* and return the table's information as a data dictionary to be referenced later to standardize the mask data.
 
 ```{r loadDataModel,echo=TRUE}
 
@@ -97,7 +96,7 @@ msks    <- loadModelMasks(mask_file_directory = dirs$masks)
 ```
 
 
-"Masks" streamline the mapping of values from existing data sets to OMOP format, or at least to how the database's *admin* thinks these data sets should be mapped. See the files in `r dirs$masks` for examples of masks files used here. 
+"Masks" streamline the mapping of values from existing data sets to OMOP format, or at least to how the database's *administrator* thinks these data sets should be mapped. See the files in `r dirs$masks` for examples of masks files used here. 
 
 Mask files are tables which provide `alias`, `table`, and `field` columns that describe each term's name in the input dataset, its destination OMOP table, and name within that table, respectively. For instance, `patient_name` in the user's database will likely map to `person_source_value` in current OMOP parlance. Using multiple masks should streamline the use of multiple analysis types as well: the database administrators can develop and implement masks and users won't need to know that `patient_name` and `cell_line_name` are both synonymous with `person_source_value` in the OMOP framework, for instance. Next generation sequencing data can be added using the `sequencing` mask, while "HLA"" data can be incorporated using an `hla` mask. 
 
@@ -129,16 +128,16 @@ msks$brca_clinical %>%
 
 ### Patient vs. observation-centric datasets
 
-The OMOP format anticipates data tables with one column per treatment/observation/measurement, while many datasets are formatted with one  treatment/observation/measurement column per patient. As an example, consider this translation of a simple input dataset with two descriptors and two observations:
+The OMOP format anticipates data tables with one row per observation, and one observation type per table. As an example, consider this translation of a simple input dataset with two descriptors and two observations:
 
 ![](man/figures/patient_to_observation_centric.PNG)
 
-ROMOPOmics converts this wide, unstandardized data formatby using a `field_idx` variable. Appending a `field_idx` value allows for observations to be "grouped" into an observation complete with their units, descriptions, etc.
+ROMOPOmics converts this wide, unstandardized data format by using a `field_idx` variable. Appending a `field_idx` value allows for observations to be "grouped" into an observation complete with their units, descriptions, etc.
 
 
-## Step 3: Translate input datasets into data model format.
+## Step 3: Translate input datasets into common data model format.
 
-Using the `readInputFiles()` function, data table inputs are translated into the destination format according to the provided `mask` (in this case `brca_clinical` and `brca_mutation`). Tables in this format are "exhaustive" in that they include all possible fields and tables in the data model, including unused ones. It is not required that every variable in the input tables are present in the mask tables. Only variables in the input tables that are mapped to the common data model format in the mask tables. 
+Using the `readInputFiles()` function, data table inputs are translated into the destination format according to the provided `mask` (in this case `brca_clinical` and `brca_mutation`). Tables in this format are "exhaustive" in that they include all possible fields and tables in the data model, including unused ones. It is not required that every variable in the input tables are present in the mask tables. Only variables in the input tables that are mapped to the common data model format will be in the mask tables. 
 
 ```{r saveMasks,echo=TRUE,message=FALSE}
 omop_inputs <- lapply(names(tcga_files), function(x) readInputFiles(input_file = tcga_files[[x]],
@@ -160,7 +159,7 @@ In this example using these masks, the OMOP tables included are `r paste(names(d
 
 ## Step 5: Add OMOP-formatted tables to a database.
 
-The tables compiled in `db_inputs` are now formatted for creating a SQLite database. `Dplyr` has built-in SQLite functionality, which is wrapped in the function `buildSQLDBR()`. However, building a database using any other package is amenable here.
+The tables compiled in `db_inputs` are now formatted for creating a SQLite database. The package `dplyr` has built-in SQLite functionality, which is wrapped in the function `buildSQLDBR()`. However, building a database using any other package is amenable here.
 
 ```{r buildDatabase,echo=TRUE}
 omop_db     <- buildSQLDBR(db_inputs,sql_db_file = file.path(dirs$base,"sqlDB.sqlite"))
@@ -170,6 +169,8 @@ dbListFields(omop_db,"PERSON")
 ```
 
 ### Raw SQLite query:
+
+With a SQL database, data can be queried with simple, clear, and transportable queries for retrieving patient and sample data.
 
 ```{r demoSQLQuery,echo=TRUE,eval=TRUE}
 
@@ -187,10 +188,13 @@ dbGetQuery(omop_db,
 
 ### DBplyr query:
 
+Alternatively, one can use commands from `dplyr` to query a SQL database, abstracting out SQL queries into possibly more intuitive R functions.
+
 ```{r demoSQLQueryDBPlyr,echo=TRUE,eval=TRUE}
 
 inner_join(tbl(omop_db,"PERSON"),
-           tbl(omop_db,"MEASUREMENT")) %>%
+           tbl(omop_db,"MEASUREMENT"),
+           by=c("person_id", "provider_id")) %>%
   select(person_source_value,
          birth_datetime,
          death_datetime,
@@ -209,17 +213,45 @@ inner_join(tbl(omop_db,"PERSON"),
 
 # TL;DR:
 
+Here is the 'too long; didn't read` section. Below are the steps to convert patient and sample data into the OMOP framework using ROMOPOmics:
 
 ```
 
 library(ROMOPOmics)
 dm_file     <- system.file("extdata","OMOP_CDM_v6_0_custom.csv",package="ROMOPOmics",mustWork = TRUE)
 dm          <- loadDataModel(master_table_file = dm_file)
-tcga_files  <- dir(dirs$data,full.names = TRUE)
+tcga_files  <- dir(dirs$data,full.names = TRUE,pattern="brca")
 names(tcga_files) <- gsub(".csv","",basename(tcga_files))
 msks        <- loadModelMasks(mask_file_directory = dirs$masks)
 omop_inputs <- lapply(names(tcga_files), function(x) readInputFiles(tcga_files[[x]],data_model=dm,mask_table=msks[[x]]))
 db_inputs   <- combineInputTables(input_table_list = omop_inputs)
 omop_db     <- buildSQLDBR(db_inputs,sql_db_file = file.path(dirs$base,"sqlDB.sqlite"))
+
+```
+
+## ATACSeq data into OMOP using TL;DR
+
+```{r}
+
+library(ROMOPOmics)
+dm_file     <- system.file("extdata","OMOP_CDM_v6_0_custom.csv",package="ROMOPOmics",mustWork = TRUE)
+dm          <- loadDataModel(master_table_file = dm_file)
+
+dirs          <- list()
+dirs$base     <- file.path(find_root(criterion = criteria$is_r_package))
+dirs$figs     <- file.path(dirs$base,"man/figures")
+dirs$demo     <- file.path(dirs$base,"demo")
+dirs$data     <- file.path(dirs$demo,"data")
+dirs$masks    <- file.path(dirs$demo,"masks")
+
+
+files  <- dir(dirs$data,full.names = TRUE,pattern = "reformat")
+names(files) <- gsub(".csv","",basename(files))
+
+msks        <- loadModelMasks(mask_file_directory = dirs$masks)
+omop_inputs <- lapply(names(files), function(x) readInputFiles(input_file=files[[x]],data_model=dm,mask_table=msks[[x]]))
+db_inputs   <- combineInputTables(input_table_list = omop_inputs)
+omop_db     <- buildSQLDBR(omop_tables = db_inputs,sql_db_file = file.path(dirs$base,"GSE60682_sqlDB.sqlite"))
+dbListTables(omop_db)
 
 ```
