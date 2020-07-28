@@ -1,8 +1,8 @@
 alias	example1	field	table	field_idx	set_value
-perturbation_type_source_value	activation	condition_source_value	CONDITION_OCCURRENCE	NA	NA
+perturbation_type_source_value	activation	condition_source_value	CONDITION_OCCURRENCE	1	NA
 treatment	control of T cell activation	condition_status_source_value	CONDITION_OCCURRENCE	NA	NA
 time_point	4hrs	route_source_value	DRUG_EXPOSURE	NA	NA
-perturbation_source_value	placebo	drug_source_value	DRUG_EXPOSURE	NA	NA
+perturbation_source_value	placebo	drug_source_value	DRUG_EXPOSURE	NA	no treatment
 perturbation_start_date	4:00:00	drug_exposure_start_datetime	DRUG_EXPOSURE	NA	NA
 perturbation_dose_value_as_number	0	quantity	DRUG_EXPOSURE	NA	NA
 perturbation_dose_unit	ug/mL	dose_unit_source_value	DRUG_EXPOSURE	NA	NA
