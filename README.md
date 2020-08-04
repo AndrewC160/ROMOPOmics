@@ -820,8 +820,9 @@ inner_join(tbl(omop_db,"PERSON"),
 
 # TL;DR:
 
-## TCGA data 
 Here is the 'too long; didn't read` section. Below are the steps to convert patient and sample data into the OMOP framework using ROMOPOmics:
+
+## TCGA data
 ```
 library(ROMOPOmics)
 dm_file     <- system.file("extdata","OMOP_CDM_v6_0_custom.csv",package="ROMOPOmics",mustWork = TRUE)
@@ -839,7 +840,6 @@ omop_inputs <- list(brca_clinical=readInputFiles(input_file = tcga_files$brca_cl
 ```
 
 ## ATACSeq data
-
 ```
 library(ROMOPOmics)
 dm_file     <- system.file("extdata","OMOP_CDM_v6_0_custom.csv",package="ROMOPOmics",mustWork = TRUE)
