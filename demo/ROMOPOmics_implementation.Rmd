@@ -26,19 +26,19 @@ dirs$masks    <- file.path(dirs$base,"masks")
 
 #Files.
 dm_file     <- system.file("extdata","OMOP_CDM_v6_0_custom.csv",package="ROMOPOmics",mustWork = TRUE)
-tcga_files  <- dir(dirs$data,full.names = TRUE)
+tcga_files  <- dir(dirs$data,full.names = TRUE,pattern="brca")
 names(tcga_files) <- gsub(".csv","",basename(tcga_files))
 
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-#ROMOPOmics
+# ROMOPOmics
 
 The purpose of ROMOPOmics is to incorporate the wide variety of sequencing-type data sets, including all pipeline by byproducts (alignment files, raw reads, readmes, etc.) as well as pipeline products of any type (gene counts, differential expression data, quality control analyses, etc.), into an SQL-friendly database that is easily accessed by users. The package should be a quick installation that allows users to specify a data directory and a mask file describing how to map that data's fields into the data model, and will return tables formatted for SQLite incorporation.
 
 ![ROMOPOmics diagram](`r file.path(dirs$base,"romopomics_2.0.PNG")`)
 
-#Step 1: Load the OMOP data model.
+# Step 1: Load the OMOP data model.
 
 This package has been designed with the OMOP [OMOP 6.0](https://github.com/OHDSI/CommonDataModel/blob/master/OMOP_CDM_v6_0.csv) framework in mind,  though it should be compatible with custom models as well. Unless a custom data model is provided, the package defaults to opening a custom version of the OMOP 6.0 data model which is packaged with it in `extdata`.
 ```{r loadDataModel,echo=TRUE}
@@ -51,14 +51,15 @@ This data model is a modified version of the OMOP model downloaded from the [OMO
 dm %>% 
   filter(table=="sequencing") %>%
   mutate(description = gsub(" CUSTOM$","",description)) %>%
-  select(-table_index) %>%
+  dplyr::select(-table_index) %>%
   kable() %>%
   kable_styling(full_width=FALSE)
 ```
 
 This table inherits from `PERSON` and `SPECIMEN`. The reasons for including this table are two fold: First, sequencing data is excedingly common in contemporary research, and is increasingly common in personalized medicine techniques. Second, to be truly useful "Sequencing" data should be able to incorporate the spectrum of products along the testing pipeline, from library preparation to sequencing to data analysis. This will allow for intermediate steps and files to be used (getting and using raw files rather than the gene counts, for example). But crucially, this will facilitate comparisons using data sets between different studies, which must account for differences in library preparation, quality control, alignment methods, reference data, etc.  Including this data should make this easier, but incorporating this variety of variables is not intuitive in the existing OMOP model.
 
-#Step 2: Design and load input masks to translate database values into OMOP fields and tables.
+# Step 2: Design and load input masks to translate database values into OMOP fields and tables.
+
 ```{r loadMasks,echo=TRUE}
 msks  <- loadModelMasks(mask_file_directory = dirs$masks)
 ```
@@ -67,7 +68,7 @@ msks  <- loadModelMasks(mask_file_directory = dirs$masks)
 
 ```{r previewClinicalMask,echo=FALSE}
 msks$brca_clinical %>%
-  select(alias,table,field,field_idx,set_value,example1) %>%
+  dplyr::select(alias,table,field,field_idx,set_value,example1) %>%
   mutate_all(function(x) ifelse(is.na(x),"",x)) %>%
   rename(example=example1) %>%
   kable() %>%
@@ -93,14 +94,14 @@ msks$brca_clinical %>%
   
 ```{r previewMutationngMask,echo=FALSE,eval=FALSE}
 msks$brca_mutation %>%
-  select(alias,everything()) %>%
+  dplyr::select(alias,everything()) %>%
   kable() %>%
   kable_styling(full_width = FALSE) %>%
   column_spec(c(1:3),color="black") %>%
   column_spec(c(4,5),color = "gray")
 ```
 
-#Step 3: Use masks to translate the input dataset into OMOP format.
+# Step 3: Use masks to translate the input dataset into OMOP format.
 
 Using the `readInputFiles()` function, data table inputs are translated into the OMOP format according to the provided `mask` (in this case `brca_clinical` and `brca_mutation`). Tables in this format are "exhaustive" in that they include all possible fields and tables in the data model, including unused ones.
 
@@ -108,7 +109,7 @@ Using the `readInputFiles()` function, data table inputs are translated into the
 omop_inputs <- lapply(names(tcga_files), function(x) readInputFiles(tcga_files[[x]],data_model=dm,mask_table=msks[[x]]))
 ```
 
-#Step 4: Combine all input tables into one set of OMOP tables.
+# Step 4: Combine all input tables into one set of OMOP tables.
 
 Since tables read via `readInputFiles()` include all fields and tables from the data model, these tables can be combined regardless of input type or mask used using `combineInputTables()`. This function combines all data sets from all mask types, and filters out all OMOP tables from the data model that are unused (no entries in any of the associated fields). Tables are not "partially" used; if any field is included from that table, all fields from that table are included. The only exception to this is table indices: if a table inherits an index from an unused table, that index column is dropped.
 
@@ -119,7 +120,7 @@ db_inputs   <- combineInputTables(input_table_list = omop_inputs)
 
 In this example using these masks, the OMOP tables included are `r paste(names(db_inputs)[1:(length(db_inputs)-1)],collapse=", ")`, and `r names(db_inputs)[length(db_inputs)]`.
 
-#Step 6: Add OMOP-formatted tables to a database.
+# Step 6: Add OMOP-formatted tables to a database.
 
 The tables compiled in `db_inputs` are now formatted for a SQLite database. `Dplyr` has built-in SQLite functionality, which is wrapped in the function `buildSQLDBR()`. However, building a database using any other package is amenable here.
 ```{r buildDatabase,echo=TRUE}
@@ -129,7 +130,8 @@ dbListTables(omop_db)
 dbListFields(omop_db,"PERSON")
 ```
 
-####Raw SQLite query:
+#### Raw SQLite query:
+
 ```{r demoSQLQuery,echo=TRUE}
 dbGetQuery(omop_db,
 'SELECT person_source_value, person.person_id,file_remote_repo_id,file_remote_repo_value
@@ -140,11 +142,12 @@ dbGetQuery(omop_db,
   kable_styling(full_width=FALSE) 
 ```
 
-####DBplyr query:
+#### DBplyr query:
+
 ```{r demoSQLQueryDBPlyr,echo=TRUE}
 inner_join(tbl(omop_db,"PERSON"),
            tbl(omop_db,"MEASUREMENT")) %>%
-  select(person_source_value,
+  dplyr::select(person_source_value,
          birth_datetime,
          death_datetime,
          measurement_source_value,
@@ -157,7 +160,8 @@ inner_join(tbl(omop_db,"PERSON"),
   kable_styling(full_width=FALSE)
 ```
 
-#TL;DR:
+# TL;DR:
+
 ```
 library(ROMOPOmics)
 dm_file     <- system.file("extdata","OMOP_CDM_v6_0_custom.csv",package="ROMOPOmics",mustWork = TRUE)

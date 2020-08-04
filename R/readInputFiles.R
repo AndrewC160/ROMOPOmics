@@ -11,9 +11,8 @@
 #'
 #' readInputFiles
 #'
-#' @import tibble
+#' @import tidyverse
 #' @import data.table
-#' @import magrittr
 #'
 #' @export
 
@@ -24,10 +23,11 @@ readInputFiles    <- function(input_file,data_model,mask_table){
   in_tab  <- fread(input_file,header = FALSE,stringsAsFactors = FALSE) %>%
               rename_all(function(x) paste0("V",c(0:(length(x)-1)))) %>%
               rename(alias=V0) %>%
-              merge(.,select(mask_table,table,alias,field,field_idx,set_value),all.x = TRUE, all.y=TRUE) %>%
+              merge(.,dplyr::select(mask_table,table,alias,field,field_idx,set_value),by="alias",all.x = TRUE, all.y=TRUE) %>%
+              drop_na(table) %>% 
               as_tibble() %>%
               rename_at(vars(starts_with("V")), function(x) gsub("V",fl_nm,x)) %>%
-              select(table,field,field_idx,alias,set_value,everything()) %>%
+              dplyr::select(table,field,field_idx,alias,set_value,everything()) %>%
               mutate_all(function(x) ifelse(x=="",NA,x)) %>%
               select_if(function(x) !all(is.na(x)))
 

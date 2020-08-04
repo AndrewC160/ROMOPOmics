@@ -11,9 +11,8 @@
 #'
 #' combineInputTables()
 #'
-#' @import tibble
+#' @import tidyverse
 #' @import data.table
-#' @import magrittr
 #'
 #' @export
 
