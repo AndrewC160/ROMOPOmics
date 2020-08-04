@@ -4,7 +4,7 @@
 \alias{combineInputTables}
 \title{combineInputTables}
 \usage{
-combineInputTables(input_table_list = lapply(seq_input_files, readInputFiles))
+combineInputTables(input_table_list)
 }
 \arguments{
 \item{input_table_list}{List of tables for inclusion, typically from readInputFiles() with different masks but the same base data model.

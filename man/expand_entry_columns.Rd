@@ -4,15 +4,10 @@
 \alias{expand_entry_columns}
 \title{expand_entry_columns}
 \usage{
-expand_entry_columns(
-  table_in = a,
-  col_nms = c("brca_clinical2", "brca_clinical3")
-)
+expand_entry_columns(table_in)
 }
 \arguments{
-\item{table_in}{Table to be expanded, generally intermediate format within readInputFiles().}
-
-\item{col_nms}{Names of columns to be "expanded".
+\item{table_in}{Table to be expanded, generally intermediate format within readInputFiles().
 
 expand_entry_columns()}
 }

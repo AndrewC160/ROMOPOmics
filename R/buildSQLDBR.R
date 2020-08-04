@@ -22,8 +22,9 @@ buildSQLDBR     <- function(omop_tables,sql_db_file = file.path(dirs$data,"OMOP_
   #https://datacarpentry.org/R-ecology-lesson/05-r-and-databases.html#creating_a_new_sqlite_database
   #Start the DB connection.
   db        <- DBI::dbConnect(RSQLite::SQLite(),sql_db_file)
-  #Add all tables to the connection.
-  lapply(names(omop_tables),function(x) copy_to(db,omop_tables[[x]],name=x,overwrite = TRUE,temporary = FALSE))
+  #Add all tables to the connection. 
+  # ASC 4AUG20: Use na.omit() in case some NA tables get through.
+  lapply(na.omit(names(omop_tables)),function(x) copy_to(db,omop_tables[[x]],name=x,overwrite = TRUE,temporary = FALSE))
   #Return the connection.
   return(db)
 }

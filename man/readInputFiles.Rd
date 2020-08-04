@@ -4,11 +4,7 @@
 \alias{readInputFiles}
 \title{readInputFiles}
 \usage{
-readInputFiles(
-  input_file = input_files[[1]][1],
-  data_model = dm,
-  mask_table = msks$brca_mutation
-)
+readInputFiles(input_file, data_model, mask_table)
 }
 \arguments{
 \item{input_file}{Name of a TSV file containing required alias column names.}

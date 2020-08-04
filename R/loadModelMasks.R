@@ -1,11 +1,15 @@
 #' loadModelMasks
 #'
-#' Function reads in all "mask" tables within a directory which include three
-#' essential columns: table, alias, and field. 'Alias' denotes the value being
-#' input, 'field' denotes the data model's equivalent field name, and 'table'
-#' denotes the data model table where that field resides.
+#' Function reads in all "mask" tables, either within a directory of mask files
+#' ending in ".tsv," a vector of file names of individual mask TSVs, or both.
+#' Automatically adds essential columns: table, alias, and field. 'Alias'
+#' denotes the value being input, 'field' denotes the data model's equivalent
+#' field name, and 'table' denotes the data model table where that field
+#' resides.
+#' 
+#' @param mask_files Either one or more file names of mask TSVs, or a directory of mask TSVs.
 #'
-#' loadModelMasks
+#' loadModelMasks()
 #'
 #' @import tibble
 #' @import data.table
@@ -13,30 +17,32 @@
 #'
 #' @export
 
-loadModelMasks  <- function(mask_file_directory,data_model=loadDataModel(),as_blank=FALSE){
-  #if(missing(mask_file_directory)){
-  #  mask_file_directory <- system.file("extdata","masks",package = "ROMOPOmics",mustWork = TRUE)
-  #}
-  if(missing(mask_file_directory)){
-    stop("No mask file directory specified.")
+loadModelMasks<- function(mask_files){
+  if(missing(mask_files)){
+    stop("No mask file or directory specified.")
   }
-  mask_files    <- Sys.glob(file.path(mask_file_directory,"*.tsv"))
-  masks         <- lapply(mask_files,function(x) as_tibble(fread(x,sep = "\t",header = TRUE)))
-  names(masks)  <- gsub("_mask.tsv","",basename(mask_files))
-
-  masks   <- lapply(masks, function(x)
-    x %>%
-      #Check that set_value and entry_index columns are present, if not add blanks.
-      mutate(set_value = if("set_value" %in% names(.)){set_value}else{NA},
-             field_idx = if("field_idx" %in% names(.)){field_idx}else{NA},
-             set_value = ifelse(set_value=="",NA,set_value),
-             field_idx = ifelse(field_idx=="",NA,field_idx)) %>%
-      select(table,alias,field,set_value,field_idx,everything())
-  )
-
-  if(as_blank){
-    return(lapply(masks,function(x) select(x,alias)))
+  #Read directories.
+  dir_inputs  <- sapply(mask_files,dir.exists)
+  dir_msks    <- do.call("c",lapply(mask_files[dir_inputs],load_mask_dir))
+  
+  #Read individual files.
+  fls_inputs  <- sapply(mask_files,file.exists) & !dir_inputs
+  fls_msks    <- lapply(mask_files[fls_inputs],read_mask_tsv)
+  nms         <- gsub("_mask.tsv","",basename(mask_files[fls_inputs]))
+  names(fls_msks) <- nms
+  
+  #Concatenate into one list.
+  msks        <- c(dir_msks,fls_msks)
+  
+  #Report errors.
+  err_inputs  <- !dir_inputs & !fls_inputs
+  if(sum(err_inputs) > 0){
+    message(paste0("The following file/directory input(s) were not found:\n\t",
+                   paste(mask_files[err_inputs],collapse="\n\t")))
+  }
+  if(length(msks) == 1){
+    return(msks[[1]])
   }else{
-    return(masks)
+    return(msks)
   }
 }

@@ -36,7 +36,6 @@ names(tcga_files) <- gsub(".csv","",basename(tcga_files))
 select <- dplyr::select
 
 dm <- loadDataModel(as_table_list = FALSE)
-
 ```
 
 # ROMOPOmics
@@ -55,6 +54,7 @@ ROMOPOmics was developed to standardize metadata of high throughput assays with 
 The CDM allows for standardizing patient clinical data. The foundation of the ROMOPOmics package is the [common data model](https://github.com/OHDSI/CommonDataModel/blob/master/OMOP_CDM_v6_0.csv) developed by the Observational Medical Outcomes Partnership Medicine and now used by the Observational Health Data Sciences and Informatics network. The data model contains all the fields and tables for standardizing patient clinical data in the OMOP framework. Unless a custom data model is provided, the package defaults to using a custom version of the OMOP 6.0 data model which is packaged within `extdata`. The OMOP data model includes `r nrow(dm)` fields distributed among `r length(unique(dm$table))` tables. We use the CDM with a few custom characteristics. First, we include an `hla_source_value` field in the `PERSON` table meant to incorporate [histocompatibility complex types](https://www.merckmanuals.com/professional/immunology-allergic-disorders/biology-of-the-immune-system/human-leukocyte-antigen-hla-system) as a key individual characteristic rather than as a separate observation. Second, our customized version includes a `SEQUENCING` table: 
 
 ```{r previewCustomOMOP,echo=FALSE}
+
 dm %>% 
   filter(table=="sequencing") %>%
   mutate(description = gsub(" CUSTOM$","",description)) %>%
@@ -62,6 +62,7 @@ dm %>%
   mutate_all(function(x) gsub("_"," ",x)) %>%
   kable(escape = TRUE) %>%
   kable_styling(full_width=FALSE,latex_options = "striped")
+
 ```
 
 There are two main reasons for including this 'mask' table. 
@@ -91,7 +92,7 @@ dm <- loadDataModel(as_table_list = FALSE)
 
 ```{r loadMasks,echo=TRUE}
 
-msks    <- loadModelMasks(mask_file_directory = dirs$masks)
+msks <- loadModelMasks(mask_file_directory = dirs$masks)
 
 ```
 
@@ -103,6 +104,7 @@ Mask files are tables which provide `alias`, `table`, and `field` columns that d
 Here's an example of a mask formatted [TCGA](https://www.cancer.gov/about-nci/organization/ccg/research/structural-genomics/tcga) clinical data, provided to the `loadModelMasks()` function as a CSV:
 
 ```{r previewClinicalMask,echo=FALSE,eval=TRUE}
+
 msks$brca_clinical %>%
   select(alias,table,field,field_idx,set_value,example1) %>%
   mutate_all(function(x) ifelse(is.na(x),"",x)) %>%
@@ -115,6 +117,7 @@ msks$brca_clinical %>%
   column_spec(c(1),background = "lightgray",border_right = TRUE,border_left = TRUE) %>%
   column_spec(c(2),bold=TRUE) %>%
   column_spec(c(4,5),color = "gray")
+
 ```
 
 
@@ -140,9 +143,12 @@ ROMOPOmics converts this wide, unstandardized data format by using a `field_idx`
 Using the `readInputFiles()` function, data table inputs are translated into the destination format according to the provided `mask` (in this case `brca_clinical` and `brca_mutation`). Tables in this format are "exhaustive" in that they include all possible fields and tables in the data model, including unused ones. It is not required that every variable in the input tables are present in the mask tables. Only variables in the input tables that are mapped to the common data model format will be in the mask tables. 
 
 ```{r saveMasks,echo=TRUE,message=FALSE}
-omop_inputs <- lapply(names(tcga_files), function(x) readInputFiles(input_file = tcga_files[[x]],
-                                                                    mask_table = msks[[x]],
-                                                                    data_model = dm))
+
+omop_inputs <- lapply(names(tcga_files), 
+                function(x) readInputFiles(input_file = tcga_files[[x]],
+                                           mask_table = msks[[x]],
+                                           data_model = dm))
+
 ```
 
 ## Step 4: Combine all input tables into SQL-friendly tables.
@@ -152,7 +158,9 @@ Since tables read via `readInputFiles()` include all fields and tables from the 
 Once data has been loaded into a single comprehensive table, an index column (`<table_name>_index`) is assigned for each permutation of all data sets included in each used table, and formats the `type` of each column based on the data model's specification (`VARCHAR(50)` is changed to "character", `INTEGER` is changed to "integer", etc.). Finally, this function returns each formatted OMOP table in a named list.
 
 ```{r parseToOMOP,echo=TRUE}
+
 db_inputs   <- combineInputTables(input_table_list = omop_inputs)
+
 ```
 
 In this example using these masks, the OMOP tables included are `r paste(names(db_inputs)[1:(length(db_inputs)-1)],collapse=", ")`, and `r names(db_inputs)[length(db_inputs)]`.
@@ -210,57 +218,29 @@ inner_join(tbl(omop_db,"PERSON"),
 
 ```
 
-
-<<<<<<< HEAD
-# TL;DR
-||||||| merged common ancestors
 # TL;DR:
 
-=======
-# TL;DR:
-
+## TCGA data 
 Here is the 'too long; didn't read` section. Below are the steps to convert patient and sample data into the OMOP framework using ROMOPOmics:
->>>>>>> ea3dcf5d2826b745e7985a7aa056e97847662526
-
 ```
 library(ROMOPOmics)
 dm_file     <- system.file("extdata","OMOP_CDM_v6_0_custom.csv",package="ROMOPOmics",mustWork = TRUE)
 dm          <- loadDataModel(master_table_file = dm_file)
-<<<<<<< HEAD
 tcga_files  <- list(brca_clinical=file.path(dirs$data,"brca_clinical.csv"),
                     brca_mutation=file.path(dirs$data,"brca_mutation.csv"))
-msks        <- list(brca_clinical=loadModelMask(file.path(dirs$masks,"brca_clinical_mask.tsv")),
-                    brca_mutation=loadModelMask(file.path(dirs$masks,"brca_mutation_mask.tsv")))
+msks        <- list(brca_clinical=loadModelMasks(file.path(dirs$masks,"brca_clinical_mask.tsv")),
+                    brca_mutation=loadModelMasks(file.path(dirs$masks,"brca_mutation_mask.tsv")))
 omop_inputs <- list(brca_clinical=readInputFiles(input_file = tcga_files$brca_clinical,
                                                  data_model = dm,
                                                  mask_table = msks$brca_clinical),
                     brca_mutation=readInputFiles(input_file = tcga_files$brca_mutation,
                                                  data_model = dm,
                                                  mask_table = msks$brca_mutation))
-||||||| merged common ancestors
-tcga_files  <- dir(dirs$data,full.names = TRUE)
-names(tcga_files) <- gsub(".csv","",basename(tcga_files))
-msks        <- loadModelMasks(mask_file_directory = dirs$masks)
-omop_inputs <- lapply(names(tcga_files), function(x) readInputFiles(tcga_files[[x]],data_model=dm,mask_table=msks[[x]]))
-=======
-tcga_files  <- dir(dirs$data,full.names = TRUE,pattern="brca")
-names(tcga_files) <- gsub(".csv","",basename(tcga_files))
-msks        <- loadModelMasks(mask_file_directory = dirs$masks)
-omop_inputs <- lapply(names(tcga_files), function(x) readInputFiles(tcga_files[[x]],data_model=dm,mask_table=msks[[x]]))
->>>>>>> ea3dcf5d2826b745e7985a7aa056e97847662526
-db_inputs   <- combineInputTables(input_table_list = omop_inputs)
-omop_db     <- buildSQLDBR(db_inputs,sql_db_file = file.path(dirs$base,"sqlDB.sqlite"))
-<<<<<<< HEAD
-||||||| merged common ancestors
-
-=======
-
 ```
 
-## ATACSeq data into OMOP using TL;DR
+## ATACSeq data
 
-```{r}
-
+```
 library(ROMOPOmics)
 dm_file     <- system.file("extdata","OMOP_CDM_v6_0_custom.csv",package="ROMOPOmics",mustWork = TRUE)
 dm          <- loadDataModel(master_table_file = dm_file)
@@ -281,6 +261,4 @@ omop_inputs <- lapply(names(files), function(x) readInputFiles(input_file=files[
 db_inputs   <- combineInputTables(input_table_list = omop_inputs)
 omop_db     <- buildSQLDBR(omop_tables = db_inputs,sql_db_file = file.path(dirs$base,"GSE60682_sqlDB.sqlite"))
 dbListTables(omop_db)
-
->>>>>>> ea3dcf5d2826b745e7985a7aa056e97847662526
 ```

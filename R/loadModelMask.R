@@ -1,11 +1,11 @@
-#' loadModelMasks
+#' loadModelMask
 #'
-#' Function reads in all "mask" tables within a directory which include three
-#' essential columns: table, alias, and field. 'Alias' denotes the value being
-#' input, 'field' denotes the data model's equivalent field name, and 'table'
-#' denotes the data model table where that field resides.
+#' Function reads in an individual "mask" table which include three essential
+#' columns: table, alias, and field. 'Alias' denotes the value being input, 
+#' 'field' denotes the data model's equivalent field name, and 'table' denotes
+#' the data model table where that field resides.
 #'
-#' loadModelMasks
+#' loadModelMask()
 #'
 #' @import tidyverse
 #' @import data.table
@@ -14,7 +14,7 @@
 
 loadModelMask  <- function(mask_tsv,data_model=loadDataModel()){
   if(missing(mask_tsv)){
-    stop("No mask file directory specified.")
+    stop("No mask file specified.")
   }
   fread(mask_tsv,sep="\t",header=TRUE) %>%
     as_tibble() %>%
