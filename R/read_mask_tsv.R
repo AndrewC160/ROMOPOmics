@@ -13,7 +13,7 @@
 #' 
 #' @export
 
-read_mask_tsv <- function(file_name="/data/projects/andrew/ROMOPOmics/demo/masks/brca_clinical_mask.tsv"){
+read_mask_tsv <- function(file_name){
   tb  <- fread(file_name,header = TRUE,stringsAsFactors = FALSE,sep = "\t") %>%
           as_tibble() %>%
           mutate(set_value = if("set_value" %in% names(.)){set_value}else{NA},
