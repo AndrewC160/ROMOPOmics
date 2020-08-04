@@ -32,8 +32,8 @@ loadDataModel <- function(master_table_file,
                     mutate(table_index = field %in% table_indices)
   if(as_table_list){
     tbl_lst     <- mst_tbl %>%
-                  group_by(table) %>%
-                  group_split()
+                    group_by(table) %>%
+                    group_split()
     names(tbl_lst)<- sapply(tbl_lst, function(x) toupper(x$table[1]))
     tbl_list    <- lapply(tbl_lst, function(x) select(x,-table))
     return(tbl_lst)

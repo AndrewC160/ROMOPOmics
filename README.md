@@ -1,6 +1,6 @@
 ---
 title: "ROMOPOmics - An OMOPOmics R package"
-date: "23 June, 2020"
+date: "22 July, 2020"
 output:
   html_document:
     toc: true
@@ -201,7 +201,7 @@ msks    <- loadModelMasks(mask_file_directory = dirs$masks)
 ```
 
 
-"Masks" streamline the mapping of values from existing data sets to OMOP format, or at least to how the database's *admin* thinks these data sets should be mapped. See the files in /Users/nickgiangreco/GitHub/ROMOPOmics/demo/masks for examples of masks files used here. 
+"Masks" streamline the mapping of values from existing data sets to OMOP format, or at least to how the database's *admin* thinks these data sets should be mapped. See the files in /data/projects/andrew/ROMOPOmics/demo/masks for examples of masks files used here. 
 
 Mask files are tables which provide `alias`, `table`, and `field` columns that describe each term's name in the input dataset, its destination OMOP table, and name within that table, respectively. For instance, `patient_name` in the user's database will likely map to `person_source_value` in current OMOP parlance. Using multiple masks should streamline the use of multiple analysis types as well: the database administrators can develop and implement masks and users won't need to know that `patient_name` and `cell_line_name` are both synonymous with `person_source_value` in the OMOP framework, for instance. Next generation sequencing data can be added using the `sequencing` mask, while "HLA"" data can be incorporated using an `hla` mask. 
 
@@ -512,7 +512,7 @@ dbListFields(omop_db,"PERSON")
 ## [17] "race_source_value"           "year_of_birth"
 ```
 
-### Raw SQLite query:
+### Raw SQLite query
 
 
 ```r
@@ -744,7 +744,7 @@ dbGetQuery(omop_db,
 </table>
 
 
-### DBplyr query:
+### DBplyr query
 
 
 ```r
@@ -808,19 +808,22 @@ inner_join(tbl(omop_db,"PERSON"),
 </table>
 
 
-# TL;DR:
-
+# TL;DR
 
 ```
-
 library(ROMOPOmics)
 dm_file     <- system.file("extdata","OMOP_CDM_v6_0_custom.csv",package="ROMOPOmics",mustWork = TRUE)
 dm          <- loadDataModel(master_table_file = dm_file)
-tcga_files  <- dir(dirs$data,full.names = TRUE)
-names(tcga_files) <- gsub(".csv","",basename(tcga_files))
-msks        <- loadModelMasks(mask_file_directory = dirs$masks)
-omop_inputs <- lapply(names(tcga_files), function(x) readInputFiles(tcga_files[[x]],data_model=dm,mask_table=msks[[x]]))
+tcga_files  <- list(brca_clinical=file.path(dirs$data,"brca_clinical.csv"),
+                    brca_mutation=file.path(dirs$data,"brca_mutation.csv"))
+msks        <- list(brca_clinical=loadModelMask(file.path(dirs$masks,"brca_clinical_mask.tsv")),
+                    brca_mutation=loadModelMask(file.path(dirs$masks,"brca_mutation_mask.tsv")))
+omop_inputs <- list(brca_clinical=readInputFiles(input_file = tcga_files$brca_clinical,
+                                                 data_model = dm,
+                                                 mask_table = msks$brca_clinical),
+                    brca_mutation=readInputFiles(input_file = tcga_files$brca_mutation,
+                                                 data_model = dm,
+                                                 mask_table = msks$brca_mutation))
 db_inputs   <- combineInputTables(input_table_list = omop_inputs)
 omop_db     <- buildSQLDBR(db_inputs,sql_db_file = file.path(dirs$base,"sqlDB.sqlite"))
-
 ```

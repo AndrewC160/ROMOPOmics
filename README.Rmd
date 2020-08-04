@@ -159,7 +159,7 @@ dbListTables(omop_db)
 dbListFields(omop_db,"PERSON")
 ```
 
-### Raw SQLite query:
+### Raw SQLite query
 
 ```{r demoSQLQuery,echo=TRUE,eval=TRUE}
 
@@ -175,7 +175,7 @@ dbGetQuery(omop_db,
 ```
 
 
-### DBplyr query:
+### DBplyr query
 
 ```{r demoSQLQueryDBPlyr,echo=TRUE,eval=TRUE}
 
@@ -197,19 +197,22 @@ inner_join(tbl(omop_db,"PERSON"),
 ```
 
 
-# TL;DR:
-
+# TL;DR
 
 ```
-
 library(ROMOPOmics)
 dm_file     <- system.file("extdata","OMOP_CDM_v6_0_custom.csv",package="ROMOPOmics",mustWork = TRUE)
 dm          <- loadDataModel(master_table_file = dm_file)
-tcga_files  <- dir(dirs$data,full.names = TRUE)
-names(tcga_files) <- gsub(".csv","",basename(tcga_files))
-msks        <- loadModelMasks(mask_file_directory = dirs$masks)
-omop_inputs <- lapply(names(tcga_files), function(x) readInputFiles(tcga_files[[x]],data_model=dm,mask_table=msks[[x]]))
+tcga_files  <- list(brca_clinical=file.path(dirs$data,"brca_clinical.csv"),
+                    brca_mutation=file.path(dirs$data,"brca_mutation.csv"))
+msks        <- list(brca_clinical=loadModelMask(file.path(dirs$masks,"brca_clinical_mask.tsv")),
+                    brca_mutation=loadModelMask(file.path(dirs$masks,"brca_mutation_mask.tsv")))
+omop_inputs <- list(brca_clinical=readInputFiles(input_file = tcga_files$brca_clinical,
+                                                 data_model = dm,
+                                                 mask_table = msks$brca_clinical),
+                    brca_mutation=readInputFiles(input_file = tcga_files$brca_mutation,
+                                                 data_model = dm,
+                                                 mask_table = msks$brca_mutation))
 db_inputs   <- combineInputTables(input_table_list = omop_inputs)
 omop_db     <- buildSQLDBR(db_inputs,sql_db_file = file.path(dirs$base,"sqlDB.sqlite"))
-
 ```

@@ -28,3 +28,5 @@ vignettes/*.pdf
 .Renviron
 .Rproj.user
 sqlDB.sqlite
+# HTML documents
+*.html
