@@ -16,8 +16,12 @@ readInputFiles(input_file, data_model, mask_table)
 readInputFiles}
 }
 \description{
-Function reads in TSV files designed with a given mask in mind, with rows
-for each field and table combination and columns for input data entries.
-Output is an "exhaustive" table including all fields and tables from the
-specified data model, including unused tables and fields.
+Given a TSV/CSV file containing a data set, that dataset's mask as formatted
+by loadModelMask(), and the desired data model produced by loadDataModel(),
+this function reads in that data table and funnels its fields into the 
+appropriate tables and fields for the data model. All data tables are
+included at this stage, including those with no entries, which allows any
+data set produced by this function to be incorporated into the same database
+as long as the same data model was used. As such, the output tables are
+"exhaustive" in that no unused columns are dropped.
 }

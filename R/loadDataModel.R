@@ -1,8 +1,10 @@
 #' loadDataModel
 #'
-#' Function reads in "official" data model and returns as tibble (and list of
-#' tables). By default, points to "cutom" version of the OMOP data model which
-#' includes the "Sequencing" table and the hla_type field in "Person".
+#' Function reads in a CSV file containing the definitions of a given data
+#' model definitions and returns either as one table or as a list of tables. By
+#' default, this function resorts to 'OMOP_CDM_v6_0_custom.csv' included in the
+#' extdata folder of the installed ROMOPOmics package, but similarly formatted 
+#' tables can be used as well as long as they are packaged as CSVs.
 #'
 #' @param master_table_file File containing the total data model used, including "field", "required", "type", "description" and "table" fields.
 #' @param as_table_list If TRUE, return the data model split into a list of tables rather than as one solid table.
@@ -22,7 +24,7 @@ loadDataModel <- function(master_table_file,
   #When reading the master table, ignore any field that is:
   # 1. A table ID.
   # 2. Ends with "_id" (these should be mapped, so maybe use them later).
-  # 3. Has no alias
+  # 3. Has no alias.
   mst_tbl       <- master_table_file %>%
                     fread(header = TRUE,sep = ",") %>%
                     as_tibble()

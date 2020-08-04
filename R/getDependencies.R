@@ -1,8 +1,11 @@
 #' getDependencies
 #'
 #' Function accepts a data model from loadDataModel() and returns a list of
-#' dependencies between constitutive tables based on the presence of index
-#' columns (columns that end with "<table_name>_id").
+#' dependencies between tables based on the presence or absence of index
+#' columns (columns that end with "<table_name>_id"). By default the 
+#' dependencies of each tableare returned in a list, but if return_matrix is 
+#' TRUE this function returns a matrix. If table names are included in as a 
+#' vector to 'inc_tabs', only those tables are included in the matrix.
 #'
 #' @param data_model Data model from loadDataModel(), in single-table format.
 #' @param inc_tabs Only include tables with these names.
@@ -11,6 +14,8 @@
 #' getDependencies()
 #'
 #' @import tidyverse
+#' @import data.table
+#' @import magrittr
 #'
 
 getDependencies   <- function(data_model=loadDataModel(),inc_tabs,return_matrix=FALSE){
@@ -40,6 +45,3 @@ getDependencies   <- function(data_model=loadDataModel(),inc_tabs,return_matrix=
   }
   return(dep_lst)
 }
-
-
-#getDeps(return_matrix = TRUE,inc_tabs = c("person","specimen","sequencing","condition_occurrence","cohort_definition","drug_exposure"))

@@ -14,7 +14,9 @@ loadDataModel(master_table_file, as_table_list = FALSE)
 loadDataModel()}
 }
 \description{
-Function reads in "official" data model and returns as tibble (and list of
-tables). By default, points to "cutom" version of the OMOP data model which
-includes the "Sequencing" table and the hla_type field in "Person".
+Function reads in a CSV file containing the definitions of a given data
+model definitions and returns either as one table or as a list of tables. By
+default, this function resorts to 'OMOP_CDM_v6_0_custom.csv' included in the
+extdata folder of the installed ROMOPOmics package, but similarly formatted 
+tables can be used as well as long as they are packaged as CSVs.
 }
