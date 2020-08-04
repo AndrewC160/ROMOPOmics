@@ -45,7 +45,7 @@ dm <- loadDataModel(as_table_list = FALSE)
 
 ROMOPOmics was developed to standardize metadata of high throughput assays with associated patient clinical data. Biomedical research datasets such as RNA-Seq experiments or other next generation sequencing datasets contain a mixture of clinical traits of the studied patients including data derived from samples perturbed by different assays, at different timepoints, with varying protocols, and more. Additionally, next generation sequencing datasets include metadata on pipeline byproducts (alignment files, raw reads, readmes, etc.) and analysis results of any type (gene counts, differential expression data, quality control analyses, etc.). Our package ROMOPOmics provides a framework to standardize these datasets and a pipeline to convert this information into a SQL-friendly database that is easily accessed by users. After installation of our R package from the github repository, users specify a data directory and a mask file describing how to map their data's fields into a common data model. The resulting standardized data tables are then formatted into a SQLite database for easily interoperating and sharing the dataset.
 
-![ROMOPOmics diagram](man/figures/romopomics_2.0.PNG)
+![](man/figures/romopomics_code_flow.png)
 
 ## Background
 

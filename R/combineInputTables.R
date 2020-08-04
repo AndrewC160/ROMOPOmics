@@ -1,11 +1,11 @@
 #' combineInputTables
 #'
-#' Given a list of input tables converted into the "exhaustive" format of the
-#' data model using readInputFiles(), convert all of these from all masks into
-#' a single table, eliminate all unused OMOP tables, and index according to
-#' each included table's unique permutations of data. Once complete, return the
-#' data model's definition of tables including formatting for type as a list of
-#' tibbles that can be submitted to buildSQLDBR.R.
+#' Given a list of formatted input tables produced by readInputFiles(), this
+#' function combines them into one set of data tables as specified by the data
+#' model. Model tables with no entries included are dropped, and each table is
+#' assigned an index based on all unique combinations of data in it. The output
+#' tables are included in a named list, which is ready to be incorporated into
+#' a SQLite databse.
 #'
 #' @param input_table_list List of tables for inclusion, typically from readInputFiles() with different masks but the same base data model.
 #'
@@ -17,11 +17,6 @@
 #' @export
 
 combineInputTables  <- function(input_table_list){
-  #Combine entire list of input tables since they should be identically
-  # formatted now, just with different NA columns. Function assumes all data
-  # sets are here at this point, including all mask types, for indexing
-  # purposes.
-
   #Reference that includes ALL columns, including IDs and fields with identical names.
   full_tb   <- Reduce(function(x,y) merge(x,y,all=TRUE),input_table_list) %>%
                 as_tibble() %>%

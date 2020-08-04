@@ -1,9 +1,10 @@
 #' expand_entry_columns
 #' 
-#' Function takes in a table with duplicated fields and a field_index column 
-#' (the output of readInputFiles, effectively) and spreads them wider, i.e. 
-#' one column per patient to one column per treatment. Probably more useful
-#' when called by readInputFiles rather than by users.
+#' Function is similar to dplyr::unnest() on all fields that are used more than
+#' once (assigned a field_idx), but ensures that new columns also contain all 
+#' common field entries (for instance, if the field 'value_as_number' is used 
+#' twice, both indices are given a column, but both columns should feature 
+#' "patient_name" and "gender_source_value".
 #' 
 #' @param table_in Table to be expanded, generally intermediate format within readInputFiles().
 #' 

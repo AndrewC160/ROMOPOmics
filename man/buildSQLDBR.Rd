@@ -2,12 +2,9 @@
 % Please edit documentation in R/buildSQLDBR.R
 \name{buildSQLDBR}
 \alias{buildSQLDBR}
-\title{buildSQLDBR.R}
+\title{buildSQLDBR}
 \usage{
-buildSQLDBR(
-  omop_tables,
-  sql_db_file = file.path(dirs$data, "OMOP_tables.sqlite")
-)
+buildSQLDBR(omop_tables, sql_db_file)
 }
 \arguments{
 \item{omop_tables}{Filesnames of all OMOP csv files to be incorporated into the database.}
@@ -15,8 +12,8 @@ buildSQLDBR(
 \item{sql_db_file}{Filename under which to store the SQLite database file.}
 }
 \description{
-Function uses dplyr's src_sqlite() function to create the SQLite database.
-While functional, this process requires reading in all input standard csvs,
-which makes this a poor choice for scaling upwards. If available, use
-buildSQLDB() instead.
+Wrapper which uses dplyr's src_sqlite() function to create the SQLite 
+database, and adds all OMOP-formatted tables (as produced by the function
+combineInputTables()) to the database. Requires a list of formatted tables
+and an output file name within which to store the SQL database.
 }

@@ -4,9 +4,7 @@
 \alias{read_mask_tsv}
 \title{read_mask_tsv}
 \usage{
-read_mask_tsv(
-  file_name = "/data/projects/andrew/ROMOPOmics/demo/masks/brca_clinical_mask.tsv"
-)
+read_mask_tsv(file_name)
 }
 \arguments{
 \item{file_name}{File name to be read. Should specify a TSV file.
