@@ -2,16 +2,16 @@
 % Please edit documentation in R/loadModelMask.R
 \name{loadModelMask}
 \alias{loadModelMask}
-\title{loadModelMasks}
+\title{loadModelMask}
 \usage{
 loadModelMask(mask_tsv, data_model = loadDataModel())
 }
 \description{
-Function reads in all "mask" tables within a directory which include three
-essential columns: table, alias, and field. 'Alias' denotes the value being
-input, 'field' denotes the data model's equivalent field name, and 'table'
-denotes the data model table where that field resides.
+Function reads in an individual "mask" table which include three essential
+columns: table, alias, and field. 'Alias' denotes the value being input, 
+'field' denotes the data model's equivalent field name, and 'table' denotes
+the data model table where that field resides.
 }
 \details{
-loadModelMasks
+loadModelMask()
 }

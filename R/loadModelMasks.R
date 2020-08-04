@@ -2,10 +2,12 @@
 #'
 #' Function reads in all "mask" tables, either within a directory of mask files
 #' ending in ".tsv," a vector of file names of individual mask TSVs, or both.
-#' Automatically adds essential columns: table, alias, and field. 'Alias'
+#' Automatically adds essential columns table, alias, and field: 'Alias'
 #' denotes the value being input, 'field' denotes the data model's equivalent
 #' field name, and 'table' denotes the data model table where that field
-#' resides.
+#' resides. If multiple files are provided, they are returned in a list named
+#' from the basenames of the loaded files. If the list of mask files is already
+#' named, these names are used instead.
 #' 
 #' @param mask_files Either one or more file names of mask TSVs, or a directory of mask TSVs.
 #'
@@ -28,7 +30,11 @@ loadModelMasks<- function(mask_files){
   #Read individual files.
   fls_inputs  <- sapply(mask_files,file.exists) & !dir_inputs
   fls_msks    <- lapply(mask_files[fls_inputs],read_mask_tsv)
-  nms         <- gsub("_mask.tsv","",basename(mask_files[fls_inputs]))
+  nms         <- names(mask_files)[fls_inputs]
+  if(is.null(nms)){
+    nms       <- gsub("\\.tsv$","",basename(mask_files[fls_inputs]))
+    nms       <- gsub("_mask$","",nms)
+  }
   names(fls_msks) <- nms
   
   #Concatenate into one list.

@@ -206,7 +206,7 @@ dm <- loadDataModel(as_table_list = FALSE)
 
 
 ```r
-msks    <- loadModelMasks(mask_file_directory = dirs$masks)
+msks <- loadModelMasks(mask_files = dirs$masks)
 ```
 
 
@@ -828,8 +828,8 @@ dm_file     <- system.file("extdata","OMOP_CDM_v6_0_custom.csv",package="ROMOPOm
 dm          <- loadDataModel(master_table_file = dm_file)
 tcga_files  <- list(brca_clinical=file.path(dirs$data,"brca_clinical.csv"),
                     brca_mutation=file.path(dirs$data,"brca_mutation.csv"))
-msks        <- list(brca_clinical=loadModelMask(file.path(dirs$masks,"brca_clinical_mask.tsv")),
-                    brca_mutation=loadModelMask(file.path(dirs$masks,"brca_mutation_mask.tsv")))
+msks        <- list(brca_clinical=loadModelMasks(file.path(dirs$masks,"brca_clinical_mask.tsv")),
+                    brca_mutation=loadModelMasks(file.path(dirs$masks,"brca_mutation_mask.tsv")))
 omop_inputs <- list(brca_clinical=readInputFiles(input_file = tcga_files$brca_clinical,
                                                  data_model = dm,
                                                  mask_table = msks$brca_clinical),
@@ -856,7 +856,7 @@ dirs$masks    <- file.path(dirs$demo,"masks")
 files  <- dir(dirs$data,full.names = TRUE,pattern = "reformat")
 names(files) <- gsub(".csv","",basename(files))
 
-msks        <- loadModelMasks(mask_file_directory = dirs$masks)
+msks        <- loadModelMasks(dirs$masks)
 omop_inputs <- lapply(names(files), function(x) readInputFiles(input_file=files[[x]],data_model=dm,mask_table=msks[[x]]))
 db_inputs   <- combineInputTables(input_table_list = omop_inputs)
 omop_db     <- buildSQLDBR(omop_tables = db_inputs,sql_db_file = file.path(dirs$base,"GSE60682_sqlDB.sqlite"))
