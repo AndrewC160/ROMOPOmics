@@ -1,11 +1,16 @@
 Package: ROMOPOmics
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Incorporates 'Omics Data Into The Observational Medical Outcomes 
+Partnership (OMOP) Data Model
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Author: Andrew Clugston, Nick Giangreco
+Maintainer: Andrew Clugston <anc174@pitt.edu>
+Description: ROMOPOmics facilitates adding sequencing-type ('Omics) data into
+the OMOP data model, as well as incorporation of that data into an SQLite 
+database for ease of use with existing healthcare or research data systems.
+Users can use ROMOPOmics to define and maintain a database that can be made
+readily available to other team members, stream lining the sharing of data
+and resources between multiple projects.
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
