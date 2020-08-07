@@ -1,6 +1,6 @@
 ---
 title: "ROMOPOmics - An OMOPOmics R package"
-date: "04 August, 2020"
+date: "07 August, 2020"
 output:
   html_document:
     toc: true
