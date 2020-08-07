@@ -17,6 +17,10 @@
 #' @export
 
 combineInputTables  <- function(input_table_list){
+  #Check if only one table was included, and if so en-list it.
+  if(!inherits(input_table_list,"list")){
+    input_table_list<- list(input_table_list)
+  }
   #Reference that includes ALL columns, including IDs and fields with identical names.
   full_tb   <- Reduce(function(x,y) merge(x,y,all=TRUE),input_table_list) %>%
                 as_tibble() %>%

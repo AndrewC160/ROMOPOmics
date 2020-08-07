@@ -1,4 +1,4 @@
-#' readInputFiles
+#' readInputFile
 #'
 #' Given a TSV/CSV file containing a data set, that dataset's mask as formatted
 #' by loadModelMask(), and the desired data model produced by loadDataModel(),
@@ -12,19 +12,26 @@
 #' @param input_file Name of a TSV file containing required alias column names.
 #' @param data_model Data model being used, typically as a tibble returned by loadDataModel().
 #' @param mask_table Mask contained in a tibble, typically as a tibble loaded by loadModelMask().
+#' @param transpose_input_table Boolean; defaults to FALSE. If TRUE, transpose tables with one row per treatment/sample to one per column.
 #'
-#' readInputFiles
+#' readInputFile
 #'
 #' @import tidyverse
 #' @import data.table
 #'
 #' @export
 
-readInputFiles    <- function(input_file,data_model,mask_table){
+readInputFile <- function(input_file,data_model,mask_table,transpose_input_table=FALSE){
   #Get file names to append to each column.
   fl_nm   <- str_match(basename(input_file),"(.+)\\.[ct]sv$")[,2]
   #Merge input file into the full data model.
-  in_tab  <- fread(input_file,header = FALSE,stringsAsFactors = FALSE) %>%
+  if(transpose_input_table){
+    in_tab<- fread(input_file,header = TRUE,stringsAsFactors = FALSE) %>%
+              transpose_to_colwise()
+  }else{
+    in_tab<- fread(input_file,header = FALSE,stringsAsFactors = FALSE)
+  }
+  in_tab  <- in_tab %>%
               rename_all(function(x) paste0("V",c(0:(length(x)-1)))) %>%
               rename(alias=V0) %>%
               merge(.,dplyr::select(mask_table,table,alias,field,field_idx,set_value),

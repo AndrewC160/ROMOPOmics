@@ -470,19 +470,19 @@ ROMOPOmics converts this wide, unstandardized data format by using a `field_idx`
 
 ## Step 3: Translate input datasets into common data model format.
 
-Using the `readInputFiles()` function, data table inputs are translated into the destination format according to the provided `mask` (in this case `brca_clinical` and `brca_mutation`). Tables in this format are "exhaustive" in that they include all possible fields and tables in the data model, including unused ones. It is not required that every variable in the input tables are present in the mask tables. Only variables in the input tables that are mapped to the common data model format will be in the mask tables. 
+Using the `readInputFile()` function, data table inputs are translated into the destination format according to the provided `mask` (in this case `brca_clinical` and `brca_mutation`). Tables in this format are "exhaustive" in that they include all possible fields and tables in the data model, including unused ones. It is not required that every variable in the input tables are present in the mask tables. Only variables in the input tables that are mapped to the common data model format will be in the mask tables. 
 
 
 ```r
 omop_inputs <- lapply(names(tcga_files), 
-                function(x) readInputFiles(input_file = tcga_files[[x]],
+                function(x) readInputFile(input_file = tcga_files[[x]],
                                            mask_table = msks[[x]],
                                            data_model = dm))
 ```
 
 ## Step 4: Combine all input tables into SQL-friendly tables.
 
-Since tables read via `readInputFiles()` include all fields and tables from the data model, these tables can be combined regardless of input type or mask used using `combineInputTables()`. This function combines all data sets from all mask types, and filters out all OMOP tables from the data model that are unused (no entries in any of the associated fields). Tables are not "partially" used; if any field is included from that table, all fields from that table are included. The only exception to this is table indices: if a table inherits an index from an unused table, that index column is dropped.
+Since tables read via `readInputFile()` include all fields and tables from the data model, these tables can be combined regardless of input type or mask used using `combineInputTables()`. This function combines all data sets from all mask types, and filters out all OMOP tables from the data model that are unused (no entries in any of the associated fields). Tables are not "partially" used; if any field is included from that table, all fields from that table are included. The only exception to this is table indices: if a table inherits an index from an unused table, that index column is dropped.
 
 Once data has been loaded into a single comprehensive table, an index column (`<table_name>_index`) is assigned for each permutation of all data sets included in each used table, and formats the `type` of each column based on the data model's specification (`VARCHAR(50)` is changed to "character", `INTEGER` is changed to "integer", etc.). Finally, this function returns each formatted OMOP table in a named list.
 
@@ -834,33 +834,27 @@ tcga_files  <- list(brca_clinical=file.path(dirs$data,"brca_clinical.csv"),
                     brca_mutation=file.path(dirs$data,"brca_mutation.csv"))
 msks        <- list(brca_clinical=loadModelMasks(file.path(dirs$masks,"brca_clinical_mask.tsv")),
                     brca_mutation=loadModelMasks(file.path(dirs$masks,"brca_mutation_mask.tsv")))
-omop_inputs <- list(brca_clinical=readInputFiles(input_file = tcga_files$brca_clinical,
+omop_inputs <- list(brca_clinical=readInputFile(input_file = tcga_files$brca_clinical,
                                                  data_model = dm,
                                                  mask_table = msks$brca_clinical),
-                    brca_mutation=readInputFiles(input_file = tcga_files$brca_mutation,
+                    brca_mutation=readInputFile(input_file = tcga_files$brca_mutation,
                                                  data_model = dm,
                                                  mask_table = msks$brca_mutation))
 ```
 
 ## ATACSeq data
 ```
-library(ROMOPOmics)
+#Data model.
 dm_file     <- system.file("extdata","OMOP_CDM_v6_0_custom.csv",package="ROMOPOmics",mustWork = TRUE)
 dm          <- loadDataModel(master_table_file = dm_file)
 
-dirs          <- list()
-dirs$base     <- file.path(find_root(criterion = criteria$is_r_package))
-dirs$figs     <- file.path(dirs$base,"man/figures")
-dirs$demo     <- file.path(dirs$base,"demo")
-dirs$data     <- file.path(dirs$demo,"data")
-dirs$masks    <- file.path(dirs$demo,"masks")
+#Mask.
+msk_file    <- file.path(dirs$masks,"GSE60682_standard_reformat_mask.tsv")
+msks        <- loadModelMasks(msk_file)
 
-
-files  <- dir(dirs$data,full.names = TRUE,pattern = "reformat")
-names(files) <- gsub(".csv","",basename(files))
-
-msks        <- loadModelMasks(dirs$masks)
-omop_inputs <- lapply(names(files), function(x) readInputFiles(input_file=files[[x]],data_model=dm,mask_table=msks[[x]]))
+#Input file.
+in_file     <- file.path(dirs$data,"GSE60682_standard.tsv")
+omop_inputs <- readInputFile(input_file=in_file,data_model=dm,mask_table=msks,transpose_input_table = TRUE)
 db_inputs   <- combineInputTables(input_table_list = omop_inputs)
 omop_db     <- buildSQLDBR(omop_tables = db_inputs,sql_db_file = file.path(dirs$base,"GSE60682_sqlDB.sqlite"))
 dbListTables(omop_db)
