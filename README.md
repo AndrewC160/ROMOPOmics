@@ -1,6 +1,6 @@
 ---
 title: "ROMOPOmics - An OMOPOmics R package"
-date: "07 August, 2020"
+date: "08 August, 2020"
 output:
   html_document:
     toc: true
@@ -840,6 +840,9 @@ omop_inputs <- list(brca_clinical=readInputFile(input_file = tcga_files$brca_cli
                     brca_mutation=readInputFile(input_file = tcga_files$brca_mutation,
                                                  data_model = dm,
                                                  mask_table = msks$brca_mutation))
+db_inputs   <- combineInputTables(input_table_list = omop_inputs)
+omop_db     <- buildSQLDBR(omop_tables = db_inputs)
+dbListTables(omop_db)
 ```
 
 ## ATACSeq data
@@ -849,13 +852,13 @@ dm_file     <- system.file("extdata","OMOP_CDM_v6_0_custom.csv",package="ROMOPOm
 dm          <- loadDataModel(master_table_file = dm_file)
 
 #Mask.
-msk_file    <- file.path(dirs$masks,"GSE60682_standard_reformat_mask.tsv")
+msk_file    <- file.path(dirs$masks,"GSE60682_standard_mask.tsv")
 msks        <- loadModelMasks(msk_file)
 
 #Input file.
 in_file     <- file.path(dirs$data,"GSE60682_standard.tsv")
 omop_inputs <- readInputFile(input_file=in_file,data_model=dm,mask_table=msks,transpose_input_table = TRUE)
 db_inputs   <- combineInputTables(input_table_list = omop_inputs)
-omop_db     <- buildSQLDBR(omop_tables = db_inputs,sql_db_file = file.path(dirs$base,"GSE60682_sqlDB.sqlite"))
+omop_db     <- buildSQLDBR(omop_tables = db_inputs)
 dbListTables(omop_db)
 ```
