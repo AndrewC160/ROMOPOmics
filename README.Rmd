@@ -240,7 +240,7 @@ omop_inputs <- list(brca_clinical=readInputFile(input_file = tcga_files$brca_cli
                                                  data_model = dm,
                                                  mask_table = msks$brca_mutation))
 db_inputs   <- combineInputTables(input_table_list = omop_inputs)
-omop_db     <- buildSQLDBR(omop_tables = db_inputs)
+omop_db     <- buildSQLDBR(omop_tables = db_inputs,file.path(dirs$base,"TCGA.sqlite"))
 dbListTables(omop_db)
 ```
 
@@ -258,6 +258,6 @@ msks        <- loadModelMasks(msk_file)
 in_file     <- file.path(dirs$data,"GSE60682_standard.tsv")
 omop_inputs <- readInputFile(input_file=in_file,data_model=dm,mask_table=msks,transpose_input_table = TRUE)
 db_inputs   <- combineInputTables(input_table_list = omop_inputs)
-omop_db     <- buildSQLDBR(omop_tables = db_inputs)
+omop_db     <- buildSQLDBR(omop_tables = db_inputs, sql_db_file=file.path(dirs$base,"GSE60682_sqlDB.sqlite"))
 dbListTables(omop_db)
 ```
