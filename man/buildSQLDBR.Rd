@@ -4,7 +4,7 @@
 \alias{buildSQLDBR}
 \title{buildSQLDBR}
 \usage{
-buildSQLDBR(omop_tables, sql_db_file)
+buildSQLDBR(omop_tables, sql_db_file = ":memory:")
 }
 \arguments{
 \item{omop_tables}{Filesnames of all OMOP csv files to be incorporated into the database.}
@@ -14,6 +14,8 @@ buildSQLDBR(omop_tables, sql_db_file)
 \description{
 Wrapper which uses dplyr's src_sqlite() function to create the SQLite 
 database, and adds all OMOP-formatted tables (as produced by the function
-combineInputTables()) to the database. Requires a list of formatted tables
-and an output file name within which to store the SQL database.
+combineInputTables()) to the database. Requires a list of formatted tables.
+If an an output file name is provided, the database file is saved in this 
+location. Otherwise, the database file is stored in memory (equivalent to 
+providing ":memory:" to dbConnect()).
 }
