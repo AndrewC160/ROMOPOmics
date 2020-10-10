@@ -841,24 +841,21 @@ omop_inputs <- list(brca_clinical=readInputFile(input_file = tcga_files$brca_cli
                                                  data_model = dm,
                                                  mask_table = msks$brca_mutation))
 db_inputs   <- combineInputTables(input_table_list = omop_inputs)
-omop_db     <- buildSQLDBR(omop_tables = db_inputs)
+omop_db     <- buildSQLDBR(omop_tables = db_inputs,file.path(dirs$base,"TCGA.sqlite"))
 dbListTables(omop_db)
 ```
 
-## ATACSeq data
+## ATAC-seq data
 ```
-#Data model.
 dm_file     <- system.file("extdata","OMOP_CDM_v6_0_custom.csv",package="ROMOPOmics",mustWork = TRUE)
 dm          <- loadDataModel(master_table_file = dm_file)
 
-#Mask.
 msk_file    <- file.path(dirs$masks,"GSE60682_standard_mask.tsv")
 msks        <- loadModelMasks(msk_file)
 
-#Input file.
 in_file     <- file.path(dirs$data,"GSE60682_standard.tsv")
 omop_inputs <- readInputFile(input_file=in_file,data_model=dm,mask_table=msks,transpose_input_table = TRUE)
 db_inputs   <- combineInputTables(input_table_list = omop_inputs)
-omop_db     <- buildSQLDBR(omop_tables = db_inputs)
+omop_db     <- buildSQLDBR(omop_tables = db_inputs, sql_db_file=file.path(dirs$base,"GSE60682_sqlDB.sqlite"))
 dbListTables(omop_db)
 ```

@@ -32,3 +32,6 @@ vignettes/*.pdf
 sqlDB.sqlite
 # HTML documents
 *.html
+#Other
+*.gz
+*.soft
