@@ -1,0 +1,76 @@
+---
+title: "GEOquery Interface"
+author: "Andrew"
+date: "9/30/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE,message = FALSE)
+library(GEOquery)
+library(tidyverse)
+base_dir  <- "/data/projects/andrew/ROMOPOmics"
+data_dir  <- file.path(base_dir,"geo_cache")
+
+#Load dataset of interest.
+gds       <- getGEO("GDS507",destdir = data_dir) #Call includes local cache function.
+```
+
+GEO has an available API package called [GEOquery](https://www.bioconductor.org/packages/release/bioc/html/GEOquery.html), and it appears to go a long way toward wrangling data files in a way that should be eas(ier) to compile into a mask. In an ideal world, we can call a `importGEO()` function which **A)** Downloads a GEO dataset (GDS) using their API (it's quite handy and effective, see below), **B)** constructs a mask file, and **C)** provides an easy interface with which users can modify column names, pick and choose column data to include, etc. **A** and **B** should be readily doable, **C** may be better served by a Shiny application, which is certainly doable but may be a bit time consuming.
+
+###Definitions
+
+* **Platforms:** Describes elements of an array (cDNAs, probe sets, antibodies, etc.) OR elements that may be detected and / or quantified in that data set (peptides, SAGE tags, etc.).
+    + **GPLxxx**
+* **Samples:** Sample records describe sample handling, manipulations to each, and abundance measurements.
+    + **GSMxxx**
+* **Series:** Set of related `Samples` that are part of a group, how they are related, and how they are ordered. Provides focal point and description of the experiment, and may contain tables of extracted data, summary conclusions, and/or analyses.
+    + **GSExxx**
+* **DataSets:** Curated sets of GEO sample data; a collection of biologically and statistically comparable GEO samples, the basis of GEOquery tools. Samples in a `DataSet` share the same `Platform`, and calculations are (presumed) to be calculated in the same way (background processing, normalizing, etc.).
+    + **GDSxxx**
+
+```{r accessors,eval=FALSE,echo=TRUE}
+#Metadata
+Meta(gds)
+
+#Contents
+Table(gds)
+
+#Column descriptors of contents
+Columns(gds)
+```
+
+##A) Download GEO dataset
+
+GEO dataset (GSE object) includes samples and some metadata, as well as a table of counts etc. Sample names and IDs can be determined here, but FTPs for raw data files etc. need to come from sample files.
+
+###1. Load GEO dataset object.
+
+Load the dataset, and pull some broad descriptors from the metadata object. Most sample-specific info of import is found in the column data via the `Columns()` function, and study-wide metadata can be found via the `Meta()` function. Sample IDs can also be gathered here.
+```{r loadDataSet}
+#Get column data for involved samples.
+gds_cols  <- Columns(gds) %>%
+              as_tibble() %>%
+              rowwise() %>%
+              mutate(description = 
+                       list(sapply(str_split(description,pattern=";",simplify = TRUE),trimws,USE.NAMES=FALSE))) %>%
+              ungroup()
+#Get metadata.
+gds_md    <- Meta(gds)
+```
+
+###2. Load platform data.
+
+This may be a bit much, can probably just list GEO ID for the purposes of most data sets.
+```{r loadPlatforms}
+gpl   <- lapply(gds_md$platform,getGEO,destdir = data_dir)
+
+```
+
+###3. Load individual sample objects.
+
+Samples (GSM objects) can be identified using IDs from the GDS object, then pulled using `getGEO()`. Probably need to make this optional; large sample lists could mean lots of downloads/queries. To stick with GEO protocols, just get the Series name from the GDS metadata.
+```{r loadSamples}
+gse   <- getGEO(gds_md$reference_series,destdir = data_dir)
+
+```
