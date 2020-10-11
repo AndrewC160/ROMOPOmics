@@ -36,10 +36,8 @@ ui <- fluidPage(
         tabPanel("Composite",icon=icon("object-group")
         ),
       #Mask tab.
-        tabPanel("Mask",icon=icon("mask"),
-          p(id="compositeTitle",h4("")),
-          dataTableOutput("tbl_comp_metadata")
-        )
+        tabPanel("Mask",icon=icon("mask")
+  )
       )
     )
   )

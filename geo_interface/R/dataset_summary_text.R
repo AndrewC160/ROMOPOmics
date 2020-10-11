@@ -2,22 +2,23 @@
 #Function returns a text blurb summarizing GEO objects (file names, sizes, 
 # table dimensions, etc.) for datasets, their platform, and their samples.
 
-dataset_summary_text  <- function(gds_acc = '',
-                                  gds_obj = NULL,
-                                  gpl_obj = NULL,
-                                  gse_obj = NULL){
+dataset_summary_text  <- function(gds_acc = '',geo_data=NULL){
+                                  #gds_obj = NULL,
+                                  #gpl_obj = NULL,
+                                  #gse_obj = NULL){
   separator <- paste(rep("-",30),collapse="")
-  if(!is.null(gds_obj)){
+  if(!is.null(geo_data$GDS$metadata)){
+    geo_ttl     <- geo_data$GDS$GDS@header$title
     geo_fl_nm   <- Sys.glob(paste0(dirs$data,"/",gds_acc,".soft.gz"))
     geo_fl_sz   <- hsize(file.size(geo_fl_nm))
-    geo_ob_sz   <- hsize(object.size(gds_obj))
-    geo_tbl_dim <- dim(Table(gds_obj))
+    geo_ob_sz   <- hsize(object.size(geo_data$GDS$GDS))
+    geo_tbl_dim <- dim(Table(geo_data$GDS$GDS))
     
     paste(sep="\n",
       separator,
       paste("GEO Dataset"),
       separator,
-      paste("Title:",gds_obj@header$title),
+      paste("Title:",geo_ttl),
       paste("Accession:",gds_acc),
       paste("File location:",geo_fl_nm),
       paste("File size:",geo_fl_sz),
@@ -28,12 +29,12 @@ dataset_summary_text  <- function(gds_acc = '',
   }else{
     gds_txt <- NULL
   }
-  if(!is.null(gpl_obj)){
-    gpl_nm      <- gpl_obj@header$geo_accession
-    gpl_fl_nm   <- Sys.glob(paste0(dirs$data,"/",gpl_obj@header$geo_accession,".soft"))
+  if(!is.null(geo_data$GPL)){
+    gpl_nm      <- geo_data$GPL$GPL@header$geo_accession
+    gpl_fl_nm   <- Sys.glob(paste0(dirs$data,"/",geo_data$GPL$GPL@header$geo_accession,".soft"))
     gpl_fl_sz   <- hsize(file.size(gpl_fl_nm))
-    gpl_ob_sz   <- hsize(object.size(gpl_val()))
-    gpl_tbl_dim <- dim(Table(gpl_val()))
+    gpl_ob_sz   <- hsize(object.size(geo_data$GPL$GPL))
+    gpl_tbl_dim <- dim(Table(geo_data$GPL$GPL))
     
     paste(sep="\n",
       separator,
@@ -50,9 +51,9 @@ dataset_summary_text  <- function(gds_acc = '',
   }else{
     gpl_txt   <- NULL
   }
-  if(!is.null(gse_obj)){
-    gse_txt   <- lapply(names(gse_obj), function(nm) {
-      x <- gse_obj[[nm]]
+  if(!is.null(geo_data$GSE)){
+    gse_txt   <- lapply(names(geo_data$GSE$metadata), function(nm) {
+      x <- geo_data$GSE$GSE[[nm]]
       smps    <- ncol(exprs(x))
       ob_ttl  <- experimentData(x)@title
       fl_nm   <- paste0(dirs$data,"/",nm)

@@ -22,6 +22,8 @@ composite_geo_table   <- function(gds_id=NULL,gds_md=NULL,gpl_md=NULL,gse_md=NUL
     stop("Unable to retrieve data with ID provided.")
   }
   md  <- rbind(gds_md,gpl_md)
-  
-  
+  vec <- set_names(md$values,md$detail)
+  for(deet in vec){
+  #  col_dat <- mutate(col_dat,!!as.name(deet):=)
+  }
 }

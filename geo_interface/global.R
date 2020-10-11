@@ -16,38 +16,40 @@ dirs$src  <- file.path(dirs$app,"R")
 
 lapply(dir(dirs$src,full.names = TRUE),source)
 
-defaults  <- list(txt_geo_id="GDS507")
+defaults  <- list(txt_geo_id="GDS509")
 
-#Debug functions
+#Default functions
 if(FALSE){
-  #Gather these once.
-  gds <- getGEO(gds_nam(),destdir = dirs$data)
-  gpl <- getGEO(gds_val()@header$platform,destdir = dirs$data)
-  gse <- getGEO(gds_val()@header$reference_series,destdir=dirs$data)
-  
-  #Pseudo reactiveValues().
-  gds_nam   <- function(gds_default=defaults$txt_geo_id){
+  gds_nam <- function(gds_default=defaults$txt_geo_id){
     return(gds_default)
   }
-  gds_val   <- function(default_gds=gds){
+  gds_val <- function(default_gds=gds){
     return(default_gds)
   }
-  gpl_val   <- function(default_gpl=gpl){
+  gpl_val <- function(default_gpl=gpl){
     return(default_gpl)
   }
-  gse_val   <- function(default_gse=gse){
+  gse_val <- function(default_gse=gse){
     return(default_gse)
   }
-  gds_md_val<- function(default_gds_val=gds_val()){
-    return(parse_metadata(gds_val()))
+  gds_md_val  <- function(default_gds=gds_nam()){
+    return()
   }
-  gpl_md_val<- function(default_gpl_val=gpl_val()){
-    return(parse_metadata(gpl_val()))
+  
+  geo_data <- function(default_geo_data=geo){
+    return(default_geo_data)
   }
-  gse_md_val<- function(default_gse_val=gse_val()){
-    return(parse_metadata(gse_val()))
-  }
-  gsm_cl_val<- function(defafult_gds_val=gds_val()){
-    return(parse_metadata(gds_val())$coldata)
-  }
+  #gsm_cl_val(gds_md_val()$coldata)
+  geo <- fetch_geo_dataset(gds_nam())
+  
+  #gds <- getGEO(gds_nam(),destdir = dirs$data)
+  #gpl <- getGEO(gds_val()@header$platform,destdir = dirs$data)
+  #gse <- getGEO(gds_val()@header$reference_series,destdir=dirs$data)
+  
+  
+#GEO GDS508
+  gds <- getGEO("GDS508",destdir = dirs$data)
+  md  <- parse_geo_metadata(gds)
+  
+  
 }
