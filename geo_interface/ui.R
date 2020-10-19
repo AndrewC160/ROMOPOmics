@@ -38,8 +38,7 @@ ui <- fluidPage(
           dataTableOutput("tbl_meta_table")
         ),
       #Mask tab.
-        tabPanel("Mask",icon=icon("mask")
-  )
+        tabPanel("Mask",icon=icon("mask"))
       )
     )
   )
