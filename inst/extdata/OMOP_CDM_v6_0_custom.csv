@@ -447,3 +447,4 @@ file_local_source,No,VARCHAR(255),Local file location. CUSTOM,sequencing
 file_remote_repo_value,No,VARCHAR(50),Remote file repository. CUSTOM,sequencing
 file_remote_repo_id,No,VARCHAR(50),Remote file repository ID. CUSTOM,sequencing
 file_remote_source_url,No,VARCHAR(255),Remote file URL. CUSTOM,sequencing
+sequencing_date,No,DATE,The date associated with the time of the sequencing event.,sequencing
