@@ -40,7 +40,7 @@ dataset_summary_text  <- function(gds_acc = '',geo_data=NULL){
       separator,
       paste("GEO Platform"),
       separator,
-      paste("Title:",gpl_obj@header$title),
+      paste("Title:",geo_data$GPL$GPL@header$title),
       paste("Accession: ",gpl_nm),
       paste("File location:",gpl_fl_nm),
       paste("File size:",gpl_fl_sz),
@@ -71,7 +71,7 @@ dataset_summary_text  <- function(gds_acc = '',geo_data=NULL){
             paste("Data table dimensions: ",paste(sapply(tbl_dim,prettyNum,big.mark=","),collapse=" x "))) %>%
         return()
     })
-    gse_txt   <- paste0(separator,"\nGEO Series [x",length(gse_obj),"]\n",separator,"\n",paste(gse_txt,collapse="\n\n"))
+    gse_txt   <- paste0(separator,"\nGEO Series [x",length(geo_data$GSE),"]\n",separator,"\n",paste(gse_txt,collapse="\n\n"))
   }else{
     gse_txt   <- NULL
   }

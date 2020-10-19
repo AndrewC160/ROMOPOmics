@@ -16,7 +16,7 @@ dirs$src  <- file.path(dirs$app,"R")
 
 lapply(dir(dirs$src,full.names = TRUE),source)
 
-defaults  <- list(txt_geo_id="GDS509")
+defaults  <- list(txt_geo_id="GDS507")
 
 #Default functions
 if(FALSE){
@@ -35,21 +35,14 @@ if(FALSE){
   gds_md_val  <- function(default_gds=gds_nam()){
     return()
   }
-  
   geo_data <- function(default_geo_data=geo){
     return(default_geo_data)
   }
+  geo_meta_tbl<- function(default_geo_data=geo_data()){
+    return(composite_geo_table(default_geo_data))
+  }
   #gsm_cl_val(gds_md_val()$coldata)
-  geo <- fetch_geo_dataset(gds_nam())
-  
-  #gds <- getGEO(gds_nam(),destdir = dirs$data)
-  #gpl <- getGEO(gds_val()@header$platform,destdir = dirs$data)
-  #gse <- getGEO(gds_val()@header$reference_series,destdir=dirs$data)
-  
-  
-#GEO GDS508
-  gds <- getGEO("GDS508",destdir = dirs$data)
-  md  <- parse_geo_metadata(gds)
-  
+  geo <- fetch_geo_dataset(gds_nam(),data_dir = dirs$data)
+  geo2<- fetch_geo_dataset(geo_dataset_id = "GDS522",data_dir=dirs$data)
   
 }

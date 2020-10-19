@@ -1,15 +1,7 @@
 server  <- function(input, output,session) {
-  gds_nam <- reactiveVal("") #Name of DataSet (accession)
-  geo_data<- reactiveVal(NULL)
-  #gds_val <- reactiveVal(NULL) #DataSet object.
-  #gpl_val <- reactiveVal(NULL) #Platform object.
-  #gse_val <- reactiveVal(NULL) #Series object.
-  #gsm_val <- reactiveVal(NULL) #Sample object.
-  #gds_md_val  <- reactiveVal(NULL) #Metadata for dataset.
-  #gpl_md_val  <- reactiveVal(NULL) #Metadata for platform.
-  #gse_md_val  <- reactiveVal(NULL) #Metadata for series.
-  #gsm_cl_val  <- reactiveVal(NULL) #Column information for sample summary.
-  #cmp_md_tbl  <- reactiveVal(NULL) #Compiled sample table.
+  gds_nam     <- reactiveVal("")  #Name of DataSet (accession)
+  geo_data    <- reactiveVal(NULL)#GEO data.
+  geo_meta_tbl<- reactiveVal(NULL)#Metadata table from GEO.
   
   observeEvent(input$txt_geo_id,
                handlerExpr = {
@@ -25,14 +17,7 @@ server  <- function(input, output,session) {
     #Clear current data entries.
     gds_nam("")
     geo_data(NULL)
-    #gds_val(NULL)
-    #gds_md_val(NULL)
-    #gpl_val(NULL)
-    #gpl_md_val(NULL)
-    #gse_val(NULL)
-    #gse_md_val(NULL)
-    #gsm_cl_val(NULL)
-    #cmp_md_tbl(NULL)
+    geo_meta_tbl(NULL)
     
     #Purge dynamic stuff from output.
     del_idx <- names(output)
@@ -53,26 +38,14 @@ server  <- function(input, output,session) {
       updateTextInput(session = session,inputId = "txt_geo_id",value = paste0(gds_nam()," [Not found]"))
     }else{
       geo_data(fetch_geo_dataset(geo_dataset_id = gds_nam()))
-#gds_val(getGEO(gds_nam(),destdir=dirs$data))
-#gpl_val(getGEO(Meta(gds_val())$platform,destdir=dirs$data))
-#gse_val(getGEO(gds_val()@header$reference_series,destdir=dirs$data))
-      
-      #Generate tables.
-      #gds_val(geo$GDS$GDS)
-      #gpl_val(geo$GPL$GPL)
-      #gse_val(geo$GSE$GSE)
-      #gds_md_val(geo$GDS$metadata)
-      #gpl_md_val(geo$GPL$metadata)
-      #gse_md_val(geo$GSE$metadata)
-      #gsm_cl_val(gds_md_val()$coldata)
-      #cmp_md_tbl(composite_sample_data())
+      geo_meta_tbl(composite_geo_table(geo_data()))
       
       #Update UI/output elements.
-      if(!is.null(gds_val())){
+      if(!is.null(geo_data()$GDS)){
         html("datasetTitle",paste0("<h4>",geo_data()$GDS$GDS@header$title,"</h4>"),add=FALSE)
         html("sampleTitle", paste0("<h4>Samples (",prettyNum(nrow(geo_data()$GDS$GDS@dataTable@columns),big.mark=","),")</h4>"),add=FALSE)
       }
-      if(!is.null(gpl_val())){
+      if(!is.null(geo_data()$GPL)){
         html("platformTitle",paste0("<h4>",geo_data()$GPL$GPL@header$title,"</h4>"),add=FALSE)
       }
       #Output elements for Series.
@@ -82,9 +55,15 @@ server  <- function(input, output,session) {
         r_f       <- geo_data()$GSE$metadata[[nm]]$raw_files
         output[[paste0("dyn_txt_abs_",nm)]] <- renderText(paste(strwrap(abstrct),collapse = "\n"))
         output[[paste0("dyn_tbl_",nm)]]     <- renderDataTable(md,escape = FALSE, selection = 'none', server = FALSE,
-                                                options = list(dom = 't', paging = FALSE, ordering = FALSE,scrollX=TRUE))
+                                                               options = list(dom = 't', paging = FALSE, ordering = FALSE,scrollX=TRUE))
         output[[paste0("dyn_txt_",nm)]]     <- renderText(paste("Raw files:",paste(r_f,collapse="\n"),sep = "\n"))
       }
+      if(!is.null(geo_meta_tbl())){
+        html("compositeTitle",paste0("<h4>",gds_nam()," metadata (",
+                                prettyNum(nrow(geo_meta_tbl()),big.mark = ",")," samples x ",
+                                prettyNum(ncol(geo_meta_tbl()),big.mark = ",")," meta values)</h4>"),add=FALSE)
+      }
+      
     }
   })
   output$txt_cache_summary<- renderText(expr={
@@ -115,6 +94,9 @@ server  <- function(input, output,session) {
     }
   })
   output$tbl_gsm_coldata  <- renderDataTable(geo_data()$GDS$metadata$coldata,
+                                             escape = FALSE, selection = 'none', server = FALSE,
+                                             options = list(dom = 't', paging = FALSE, ordering = FALSE,scrollX=TRUE,rownames=FALSE))
+  output$tbl_meta_table   <- renderDataTable(geo_meta_tbl() %>% mutate_if(function(x) !is.factor(x),truncate_by_chars,max_char=30),
                                              escape = FALSE, selection = 'none', server = FALSE,
                                              options = list(dom = 't', paging = FALSE, ordering = FALSE,scrollX=TRUE,rownames=FALSE))
 }

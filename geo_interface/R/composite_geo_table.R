@@ -1,29 +1,39 @@
-#composite_geo_table
+#composite_geo_table()
 
-composite_geo_table   <- function(gds_id=NULL,gds_md=NULL,gpl_md=NULL,gse_md=NULL,data_dir=NULL){
-  if(!is.null(gds_id)){
-    #Start from scratch with GDS ID.
-    geo_data  <- fetch_geo_dataset(gds_id,data_dir=data_dir)
-    if(!is.null(geo_data)){
-      gds_md  <- geo_data$GDS$metadata$metadata %>% mutate(detail=paste("gds",detail,sep="_"))
-      gpl_md  <- geo_data$GPL$metadata$metadata %>% mutate(detail=paste("gpl",detail,sep="_"))
-      gse_md  <- geo_data$GSE$metadata
-      gse_meta<- lapply(names(gse_md), function(x) {
-        md    <- gse_md[[x]]$metadata
-        fls   <- enframe(gse_md[[x]]$raw_files,value = "remote_raw_file")
-        
-        
-        
-        x$metadata})
-      gse_fls <- lapply(geo_data$GSE$metadata, function(x) enframe(x$raw_files))
-      col_dat <- gds_md$coldata
-    }
-  }else{
-    stop("Unable to retrieve data with ID provided.")
+composite_geo_table   <- function(geo_input=NULL){
+  if(is.null(geo_input)){return(NULL)}
+  mds <- lapply(geo_input, function(x) x$metadata)
+  
+  #GDS details.
+  if(is.null(mds$GDS)){stop("No GDS slot present with column data.")}
+  col_dat   <- mds$GDS$coldata %>% ungroup()
+  gds_md    <- mds$GDS$metadata %>% 
+                mutate(detail=paste("gds",detail,sep="_")) %>%
+                expand_and_tpose(rows_out = nrow(col_dat))
+  col_dat   <- cbind(col_dat,gds_md) %>% as_tibble()
+  
+  #GPL details.
+  if(!is.null(mds$GPL)){
+    gpl_md    <- mds$GPL$metadata %>% 
+                  mutate(detail=paste("gpl",detail,sep="_")) %>%
+                  filter(values != " ") %>%
+                  expand_and_tpose(rows_out = nrow(col_dat))
+    col_dat   <- cbind(col_dat,gpl_md) %>% as_tibble()
   }
-  md  <- rbind(gds_md,gpl_md)
-  vec <- set_names(md$values,md$detail)
-  for(deet in vec){
-  #  col_dat <- mutate(col_dat,!!as.name(deet):=)
+  
+  #GSE details.
+  if(!is.null(mds$GSE)){
+    gse_md    <- lapply(names(mds$GSE), function(x){
+                  nm  <- gsub("_series_matrix.txt.+$","",x)
+                  md  <- mds$GSE[[x]]
+                  rf  <- enframe(md$raw_files,name="sample",value = "ftp_loc")
+                  md  <- md$metadata %>% 
+                          mutate(detail = paste("gse",detail,sep="_")) %>%
+                          expand_and_tpose(rows_out = nrow(rf))
+                  return(cbind(rf,md) %>% as_tibble)
+                 }) %>%
+      do.call(rbind,.)
+    col_dat   <- merge(col_dat,gse_md,all.x = TRUE,all.y = FALSE) %>% as_tibble()
   }
+  return(col_dat)
 }
