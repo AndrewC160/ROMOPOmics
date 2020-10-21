@@ -15,6 +15,7 @@
 /*.Rcheck/
 # RStudio files
 .Rproj.user/
+.rds
 # produced vignettes
 vignettes/*.html
 vignettes/*.pdf
@@ -35,3 +36,5 @@ sqlDB.sqlite
 #Other
 *.gz
 *.soft
+*.txt
+*.tsv

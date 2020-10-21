@@ -37,7 +37,7 @@ server  <- function(input, output,session) {
     if(!url.exists(url)){
       updateTextInput(session = session,inputId = "txt_geo_id",value = paste0(gds_nam()," [Not found]"))
     }else{
-      geo_data(fetch_geo_dataset(geo_dataset_id = gds_nam()))
+      geo_data(fetch_geo_datasets(geo_dataset_id = gds_nam()))
       geo_meta_tbl(composite_geo_table(geo_data()))
       
       #Update UI/output elements.
