@@ -35,11 +35,41 @@ GEO has an available API package called [GEOquery](https://www.bioconductor.org/
 
 ##fetch_geo_datasets() and fetch_geo_series()
  
-Functions accept one or more strings for GEO `Datasets` (always format "GDSnnn") and `GEO Series` (always format "GDSn+"), respectively. Each retrieves all associated GPL and GSE objects (and GDS, for `Dataset` queries), and packages these into a list along with their respective metadata. Any that return invalid URLs are omitted and are added to an `invalid_url` list entry. For each valid ID, the respective `GEOquery` objects are retrieved (GDS,GPL,GSE), though for now samples (GSM) are not (some series have hundreds of samples, each with fairly large objects associated). If multiple datasets are included in the list a merged metadata table is returned that includes data from all metadata tables combined.
+Functions accept one or more strings for GEO `Datasets` (always format "GDSnnn") and `GEO Series` (always format "GSEn+"), respectively. Each retrieves all associated GPL and GSE objects (and GDS, for `Dataset` queries), and packages these into a list along with their respective metadata. Any that return invalid URLs are omitted and are added to an `invalid_url` list entry. For each valid ID, the respective `GEOquery` objects are retrieved (GDS,GPL,GSE), though for now samples (GSM) are not (some series have hundreds of samples, each with fairly large objects associated). If multiple datasets are included in the list a merged metadata table is returned that includes data from all metadata tables combined. Finally, an empty maskis returned
+
+### `fetch_geo_datasets()`
 ```{r get_geo_dataset,echo=TRUE,warning=FALSE,message=FALSE}
 geos  <- fetch_geo_datasets(geo_dataset_ids = c("GDS507","GDS508","GDS509"),data_dir = data_dir)
 md    <- geos$merged_metadata
 ```
+
+#### Object layout
+
+**GDS list**
+
+* *GDS 507*
+* *GDS 508*
+* *GDS 509*
+    + GDS 
+        + S4 object
+        + metadata
+    + GPL 
+        + S4 object
+        + metadata
+    + GSE
+        + Series A
+        + Series B
+        + Series C
+            + ExpressionSet object
+            + Metadata
+                + Metadata table
+                + Raw files
+                + Abstract
+    + Metadata table
+    + Blank mask table
+* *Merged metadata*
+* *Blank mask*
+* *Invalid URLs*
 
 #### Combined metadata sample:
 
@@ -54,7 +84,7 @@ md %>%
   kable_styling(full_width = FALSE)
 ```
 
-## Consistency between GEO datasets.
+#### Consistency between GEO datasets.
 ```{r get_random_gds}
 total_tests <- 50 #Invalid IDs get excluded, so 50 -> ~30 or so on average.
 rnd_ids_txt <- file.path(data_dir,"ds_seeds.txt")
@@ -77,22 +107,8 @@ if(file.exists(test_rds)){
 }
 ```
 ```{r get_randomized_metadata}
-sum_m_data  <- gds_list$merged_metadata
-values      <- sum_m_data %>% 
-                summarize_all(function(x) list(x)) %>% 
-                pivot_longer(cols = everything()) %>%
-                rowwise() %>%
-                mutate(NA_count = sum(unlist(sapply(value,is.na))),
-                       value=list(truncate_by_chars(unique(as.character(value)),40)),
-                       examples= case_when(
-                         length(value) == 1 ~ value[[1]],
-                         length(value) <= 10 ~ paste(unlist(value),collapse=", "),
-                         length(value) > 10 ~ paste0(
-                                                paste(unlist(value)[sample(1:length(unlist(value)),size = 3,replace=TRUE)],collapse=", "),
-                                                  ", etc. [",prettyNum(length(value),big.mark = ","),"]")))
-m_data      <- lapply(gds_list[grepl("^GDS",names(gds_list))], function(x) x$metadata)
-
-gds_cols    <- lapply(m_data,colnames) %>% 
+gds_cols    <- lapply(gds_list[grepl("^GDS",names(gds_list))], function(x) x$metadata) %>%
+                lapply(colnames) %>% 
                 unlist() %>%
                 enframe(name="sample",value="col_name") %>%
                 group_by(col_name) %>%
@@ -111,30 +127,61 @@ Since some metadata values and columns vary between `Datasets`, I randomly sampl
 ```{r tableConsistentColumns}
 consistent_columns  <- gds_cols %>%
                         #filter(count == sum(grepl("^GDS",names(gds_list)))) %>% 
-                        merge(select(values,-value),by.x = "col_name",by.y="name") %>%
+                        merge(gds_list$blank_mask,by.x = "col_name",by.y="alias") %>%
                         as_tibble() %>%
                         select(-count,-samples) %>%
+                        arrange(na_count) %>%
                         group_split(component)
 names(consistent_columns) <- c("Dataset","Platform","Series","Other")
 ```
 
-### Consistent metadata entries {.tabset}
+#### Consistent metadata entries {.tabset}
 
-#### Dataset
+##### Dataset
 `r consistent_columns$Dataset %>% select(-component) %>% kable() %>% kable_styling(full_width = FALSE)`
 
-#### Platform
+##### Platform
 `r consistent_columns$Platform %>% select(-component) %>% kable() %>% kable_styling(full_width = FALSE)`
 
-#### Series
+##### Series
 `r consistent_columns$Series %>% select(-component) %>% kable() %>% kable_styling(full_width = FALSE)`
 
-#### Other
+##### Other
 `r consistent_columns$Other %>% select(-component) %>% kable() %>% kable_styling(full_width = FALSE)`
 
 
-## Sequencing datasets.
-#### Queries
+### `fetch_geo_series()`
+```{r get_geo_series,echo=TRUE,warning=FALSE,message=FALSE,eval=FALSE}
+geos  <- fetch_geo_datasets(geo_dataset_ids = c("GSE000001","GSE000002","GSE000003"),data_dir = data_dir)
+md    <- geos$merged_metadata
+```
+
+#### Object layout
+
+**GSE list**
+
+* **GSE 000001**
+* **GSE 000002**
+* **GSE 000003**
+    + *GPL *
+        + S4 object
+        + metadata
+    + *GSE*
+        + Series A
+        + Series B
+        + Series C
+            + ExpressionSet object
+            + Metadata
+                + Metadata table
+                + Raw files
+                + Abstract
+    + *Metadata table*
+    + *Blank mask table*
+* **Merged metadata**
+* **Blank mask**
+* **Invalid URLs**
+
+### Query
 
 GEO queries can be done [online](https://www.ncbi.nlm.nih.gov/gds), and query/filter syntax can be found [here](https://www.ncbi.nlm.nih.gov/geo/info/qqtutorial.html). To find a few useful sequencing datasets I used the following filter, which is stored in `data/ds_ids_kidney_sequencing.txt`:
 ```
@@ -153,6 +200,7 @@ geo_list  <- fetch_geo_series(geo_series_ids = seq_ids,data_dir = data_dir)
 ```{r get_sequencing_metadata}
 sum_m_data  <- geo_list$merged_metadata
 write.table(sum_m_data,file = file.path(base_dir,"geo_interface/example_metadata_table.tsv"),sep = "\t",row.names = FALSE,quote = FALSE)
+write.table(arrange(geo_list$blank_mask,na_count),file=file.path(base_dir,"geo_interface/example_mask.tsv"),sep="\t",row.names=FALSE,quote=FALSE)
 values      <- sum_m_data %>% 
                 summarize_all(function(x) list(x)) %>% 
                 pivot_longer(cols = everything()) %>%
@@ -175,18 +223,17 @@ geo_cols    <- lapply(m_data,colnames) %>%
                           samples = list(sample),
                           .groups="drop") %>%
                 arrange(desc(count)) %>%
-                mutate(component = case_when(grepl("^gds",col_name) ~ "Dataset",
-                                             grepl("^gpl",col_name) ~ "Platform",
+                mutate(component = case_when(grepl("^gpl",col_name) ~ "Platform",
                                              grepl("^gse",col_name) ~ "Series",
                                              TRUE ~ "Other") %>%
-                                    factor(levels=c("Dataset","Platform","Series","Other")))
+                                    factor(levels=c("Platform","Series","Other")))
 ```
 ```{r tableConsistentColumnsSequencing}
-consistent_columns  <- gds_cols %>%
-                        #filter(count == sum(grepl("^GDS",names(gds_list)))) %>% 
+consistent_columns  <- geo_cols %>%
                         merge(select(values,-value),by.x = "col_name",by.y="name") %>%
                         as_tibble() %>%
                         select(-count,-samples) %>%
+                        arrange(NA_count) %>%
                         group_split(component)
 names(consistent_columns) <- c("Platform","Series","Other")
 ```

@@ -18,9 +18,10 @@ parse_gse_metadata  <- function(gse_in=NULL){
             pivot_longer(cols=!geo_accession,names_to = "detail") %>%
             mutate(channel = str_match(detail,"ch([:digit:]+)")[,2],
                    detail = gsub("[:_\\.]ch[0123456789]+","",detail)) %>% 
-            group_split(channel) %>%
-            lapply(function(x) pivot_wider(x,id_cols = c("geo_accession","channel"),names_from = "detail",values_from = "value")) %>%
-            do.call(rbind,.)
+            pivot_wider(id_cols = c(geo_accession,channel),names_from=detail,values_from=value)
+            #group_split(channel) %>%
+            #lapply(function(x) pivot_wider(x,id_cols = c("geo_accession","channel"),names_from = "detail",values_from = "value")) %>%
+            #do.call(rbind,.)
   #rbind one copy of each channel-independent entry per channel, then merge.
   md    <- lapply(unique(ch_md$channel), function(x) {
               md %>%

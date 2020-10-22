@@ -29,13 +29,13 @@ fetch_geo_datasets  <- function(geo_dataset_ids=c("GDS507","GDS508"),data_dir = 
     
     #Check that the provided ID leads to a real URL.
     if(!check_geo_by_url(gdid)){
-      message(paste('ID leads to an invalid URL:\n\t',url))
+      message(paste('ID leads to an invalid URL:\n\t',gdid))
       return("Invalid URL.")
     }
     
     #Gather GEO data.
     if(is.null(data_dir)){data_dir  <- tempdir()}
-    gds <- getGEO(geo_dataset_ids,destdir = data_dir)
+    gds <- getGEO(gdid,destdir = data_dir)
     gpl <- getGEO(Meta(gds)$platform,destdir=data_dir)
     gse <- getGEO(gds@header$reference_series,destdir=data_dir)
     gds_md  <- parse_metadata(gds)

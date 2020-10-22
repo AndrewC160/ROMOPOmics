@@ -47,5 +47,5 @@ composite_geo_table   <- function(geo_input=NULL){
                        expand_and_tpose(input_frame = gpl_md,rows_out = nrow(col_dat)))
     }
   }
-  return(col_dat)
+  return(as_tibble(col_dat))
 }
