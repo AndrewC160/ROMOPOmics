@@ -19,5 +19,5 @@ parse_gds_coldata <- function(gds_in=NULL){
     separate(description,into = c("desc_name","desc_value"),sep = ":") %>%
     mutate_at(vars(-group_cols()),trimws) %>%
     mutate(desc_name = gsub(" for GSM[0123456789]+","",desc_name)) %>%
-    pivot_wider(names_from=desc_name,values_from=desc_value,values_fn = function(x) paste(x,collapse=";"))
+    pivot_wider(names_from=desc_name,values_from=desc_value,values_fn = list(desc_value=function(x) paste(x,collapse=";")))
 }

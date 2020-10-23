@@ -13,9 +13,10 @@ library(rmarkdown)
 library(kableExtra)
 library(data.table)
 library(RCurl)
-base_dir  <- "/data/projects/andrew/ROMOPOmics"
-data_dir  <- file.path(base_dir,"geo_interface/data")
-src_dir   <- file.path(base_dir,"geo_interface/R")
+library(here)
+base_dir  <- here()
+data_dir  <- file.path(base_dir,"data")
+src_dir   <- file.path(base_dir,"R")
 lapply(dir(src_dir,full.names = TRUE),source)
 ```
 
@@ -152,7 +153,7 @@ names(consistent_columns) <- c("Dataset","Platform","Series","Other")
 
 ### `fetch_geo_series()`
 ```{r get_geo_series,echo=TRUE,warning=FALSE,message=FALSE,eval=FALSE}
-geos  <- fetch_geo_datasets(geo_dataset_ids = c("GSE000001","GSE000002","GSE000003"),data_dir = data_dir)
+geos  <- fetch_geo_series(geo_series_ids = c("GSE100001","GSE000002","GSE000003"),data_dir = data_dir)
 md    <- geos$merged_metadata
 ```
 
@@ -199,8 +200,8 @@ geo_list  <- fetch_geo_series(geo_series_ids = seq_ids,data_dir = data_dir)
 
 ```{r get_sequencing_metadata}
 sum_m_data  <- geo_list$merged_metadata
-write.table(sum_m_data,file = file.path(base_dir,"geo_interface/example_metadata_table.tsv"),sep = "\t",row.names = FALSE,quote = FALSE)
-write.table(arrange(geo_list$blank_mask,na_count),file=file.path(base_dir,"geo_interface/example_mask.tsv"),sep="\t",row.names=FALSE,quote=FALSE)
+write.table(sum_m_data,file = file.path(base_dir,"example_metadata_table.tsv"),sep = "\t",row.names = FALSE,quote = FALSE)
+write.table(arrange(geo_list$blank_mask,na_count),file=file.path(base_dir,"example_mask.tsv"),sep="\t",row.names=FALSE,quote=FALSE)
 values      <- sum_m_data %>% 
                 summarize_all(function(x) list(x)) %>% 
                 pivot_longer(cols = everything()) %>%
