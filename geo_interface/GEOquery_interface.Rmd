@@ -22,7 +22,7 @@ lapply(dir(src_dir,full.names = TRUE),source)
 
 GEO has an available API package called [GEOquery](https://www.bioconductor.org/packages/release/bioc/html/GEOquery.html), and it appears to go a long way toward wrangling data files in a way that should be eas(ier) to compile into a mask. In an ideal world, we can call a `importGEO()` function which **A)** Downloads a GEO dataset (GDS) using their API, **B)** constructs a table of available metadata, **C)** constructs a mask file, and **D)** provides an easy interface with which users can modify column names, pick and choose column data to include, etc. **A**, **B**, and **C** should be readily doable, and **D** may be better served by a Shiny application, which I have begun work on...but there's still a ways to go before it's useful.
 
-###Definitions
+## Definitions
 
 * **DataSets:** Curated sets of GEO sample data; a collection of biologically and statistically comparable GEO samples, the basis of GEOquery tools. Samples in a `DataSet` share the same `Platform`, and calculations are (presumed) to be calculated in the same way (background processing, normalizing, etc.).
     + **GDSxxx**
@@ -34,11 +34,12 @@ GEO has an available API package called [GEOquery](https://www.bioconductor.org/
     + **GSMxxx**
     + Potentially lots of these; need to decide how to handle these, package probably shouldn't download 150 samples on a whim.
 
-##fetch_geo_datasets() and fetch_geo_series()
+### fetch_geo_datasets() and fetch_geo_series()
  
 Functions accept one or more strings for GEO `Datasets` (always format "GDSnnn") and `GEO Series` (always format "GSEn+"), respectively. Each retrieves all associated GPL and GSE objects (and GDS, for `Dataset` queries), and packages these into a list along with their respective metadata. Any that return invalid URLs are omitted and are added to an `invalid_url` list entry. For each valid ID, the respective `GEOquery` objects are retrieved (GDS,GPL,GSE), though for now samples (GSM) are not (some series have hundreds of samples, each with fairly large objects associated). If multiple datasets are included in the list a merged metadata table is returned that includes data from all metadata tables combined. Finally, an empty maskis returned
 
-### `fetch_geo_datasets()`
+#### `fetch_geo_datasets()`
+
 ```{r get_geo_dataset,echo=TRUE,warning=FALSE,message=FALSE}
 geos  <- fetch_geo_datasets(geo_dataset_ids = c("GDS507","GDS508","GDS509"),data_dir = data_dir)
 md    <- geos$merged_metadata
@@ -75,6 +76,7 @@ md    <- geos$merged_metadata
 #### Combined metadata sample:
 
 The only metadata retrieved for a table is the metadata that is consistent accross samples OR found in the `Dataset` column data; otherwise things get complicated, and it's difficult to parse what should go where, apply to which samples, etc. We can look into other ways to go about this later. Since the original GDS/GPL/GSE objects are included in the GEO list, these values can be accessed normally using the GEOquery package (e.g. `Columns(geos$GDS509$GDS[[1]])`). Below is a sample of rows and columns from the combined table (`r paste0(paste(dim(md),collapse=" sample rows x ")," metadata columns")`).
+
 ```{r displayMetadata,echo=FALSE}
 md %>%
   select(sample,gse_id,gse_title,gse_supplementary_file) %>%
@@ -86,6 +88,7 @@ md %>%
 ```
 
 #### Consistency between GEO datasets.
+
 ```{r get_random_gds}
 total_tests <- 50 #Invalid IDs get excluded, so 50 -> ~30 or so on average.
 rnd_ids_txt <- file.path(data_dir,"ds_seeds.txt")
@@ -107,6 +110,7 @@ if(file.exists(test_rds)){
   saveRDS(gds_list,file = test_rds)
 }
 ```
+
 ```{r get_randomized_metadata}
 gds_cols    <- lapply(gds_list[grepl("^GDS",names(gds_list))], function(x) x$metadata) %>%
                 lapply(colnames) %>% 
@@ -125,6 +129,7 @@ gds_cols    <- lapply(gds_list[grepl("^GDS",names(gds_list))], function(x) x$met
 ```
 
 Since some metadata values and columns vary between `Datasets`, I randomly sampled `r length(gds_ids)` IDs (randomly changed the numeric components of the IDs) and pulled each of them (`r sum(grepl("^GDS",names(gds_list)))` were valid URLs). Among these, the following metadata were present, and those that weren't found in all samples are filled in with NA values (indicated in this table by the `NA_count` column). While these data are combined into one table, I've split them into tabs by origin here. The total dimensions of the metadata table are `r paste(paste(dim(gds_list$merged_metadata),collapse=" sample rows x "),"metadata columns")`, and this table shows only the metadata values (`col_name`), how many NA values are present in the merged table (indicating some Datasets didn't have these columns; `NA_count`), and up to 10 examples of the values in these columns (brackets indicate that additional values in the table are not shown).
+
 ```{r tableConsistentColumns}
 consistent_columns  <- gds_cols %>%
                         #filter(count == sum(grepl("^GDS",names(gds_list)))) %>% 
@@ -149,6 +154,7 @@ names(consistent_columns) <- c("Dataset","Platform","Series","Other")
 
 ##### Other
 `r consistent_columns$Other %>% select(-component) %>% kable() %>% kable_styling(full_width = FALSE)`
+
 
 
 ### `fetch_geo_series()`
@@ -252,3 +258,16 @@ Combined metadata dimensions: `r paste(paste(dim(geo_list$merged_metadata),colla
 #### Other
 `r consistent_columns$Other %>% select(-component) %>% kable() %>% kable_styling(full_width = FALSE)`
 
+
+
+
+## Application: Human growth is associated with distinct patterns of gene expression in evolutionarily conserved networks by Stevens et al. 2013
+
+```{r}
+
+gse_ids <- c("GSE9006", "GSE26440", "GSE11504", "TABM666", "GSE6011", "GSE37721", "GSE20307", "GSE20436")
+
+stevens_gse_lst <- fetch_geo_series(gse_ids)
+
+stevens_gse_lst$merged_metadata
+```
