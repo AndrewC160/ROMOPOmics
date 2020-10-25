@@ -1,4 +1,19 @@
-#parse_gse_metadata
+#' parse_gse_metadata
+#'
+#' Background function (not typically user-facing).
+#' 
+#' Given a series list (GSE), parse each to generate metadata table, raw file
+#' list, and retrieve the associated abstract.
+#' 
+#' @param gse_in GSE list, as returned by getGEO() (list of ExpressionSet S4 objects).
+#' 
+#' @import tidyverse
+#' @import GEOquery
+#' @import stats
+#' 
+#' parse_gse_metadata()
+#' 
+#' @export
 
 parse_gse_metadata  <- function(gse_in=NULL){
   if(is.null(gse_in)){return(NULL)}

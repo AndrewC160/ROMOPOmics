@@ -1,4 +1,18 @@
-#composite_geo_table()
+#' composite_geo_table
+#' 
+#' Background function (not user-facing).
+#' 
+#' Given a GEO list object from one of the fetch functions, composite_geo_table
+#' builds a table of metadata based on metadata from comprised GDS, GSE, and 
+#' GPL objects.
+#' 
+#' @param geo_input GEO input objet (list) from a fetch function.
+#' 
+#' @import tidyverse
+#' 
+#' composite_geo_table()
+#' 
+#' @export
 
 composite_geo_table   <- function(geo_input=NULL){
   if(is.null(geo_input)){return(NULL)}

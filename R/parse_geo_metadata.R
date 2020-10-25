@@ -1,9 +1,19 @@
-#!/bin/Rscript
-#Parse GEO dataset metadata.
-# Breaks metadata into a tibble of all values that apply accross all samples 
-# ("all_samples"), i.e. all values that have one entry, and a tibble of all 
-# metadata with multiple values ("other_values"). Also returns a text-based
-# summary of these "other values" as "other_values_txt".
+#' parse_geo_metadata
+#' 
+#' Background function (not typically user-facing).
+#' 
+#' Breaks metadata into a tibble of all values that apply accross all samples
+#' ("all_samples"), i.e. all values that have one entry, and a tibble of all
+#' metadata with multiple values ("other_values"). Also returns a text-based
+#' summary of these "other values" as "other_values_txt".
+#' 
+#' @param geo_in GEO object as returned by getGEO() (GDS or GSE, generally).
+#' 
+#' @import tidyverse
+#' 
+#' parse_geo_metadata()
+#' 
+#' @export
 
 parse_geo_metadata  <- function(geo_in=NULL){
   if(is.null(geo_in)){return(NULL)}

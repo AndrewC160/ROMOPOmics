@@ -1,5 +1,19 @@
-#!/bin/Rscript
-#Parse GDS coldata for all included samples.
+#' parse_gds_coldata
+#' 
+#' Background function (not typically user-facing).
+#' 
+#' Given a GDS object as returned from getGEO(), retrieves column data and 
+#' formats for use with metadata tables, including parsing metadata values
+#' based on semicolon-separated columns in the data (e.g. "source: cell type").
+#' 
+#' @param gds_in GDS object to be parsed, generally as returned by getGEO().
+#' 
+#' @import GEOquery
+#' @import tidyverse
+#' 
+#' parse_gds_coldata()
+#' 
+#' @export
 
 parse_gds_coldata <- function(gds_in=NULL){
   if(is.null(gds_in)){return(NULL)}

@@ -1,6 +1,27 @@
-#fetch_geo_series
+#' fetch_geo_series
+#' 
+#' Wrapper for most GEO import functions when incorporating GEOquery sample
+#' series'. Given a GEO series ID (i.e. "GSE158946") or list of such IDs,
+#' function retrieves S4 metadata obejcts from GEOquery for each dataset, as 
+#' well as its associated platform (GPL) and column data. Function also 
+#' produces a metadata table for each such component, and stores these within
+#' nested list. A comprehensive metadata table is also produced and stored. If
+#' multiple IDs are submitted, these are imported recursively, and metadata 
+#' from each is a merged into a comprehensive metadata table in the top-level
+#' list. Invalid ID entries are identified by checking the validity of their 
+#' purported URL: if invalid, a warning message is displayed. With multiple
+#' IDs, these are added to a text object denoting which failed.
+#' 
+#' @param geo_dataset_ids GEO series ID (e.g. "GSE158946") or a list of such IDs.
+#' @param data_dir Directory into which retrieved data objects should be stored. NULL by default, in which case saved to memory in a temp folder.
+#' 
+#' @import tidyverse
+#' 
+#' fetch_geo_series()
+#' 
+#' @export
 
-fetch_geo_series  <- function(geo_series_ids=c("GSE158946","GSE146796"),data_dir = NULL){
+fetch_geo_series  <- function(geo_series_ids,data_dir = NULL){
   if(length(geo_series_ids) > 1){
     geo       <- lapply(geo_series_ids,fetch_geo_series,data_dir=data_dir)
     char_ents <- which(sapply(geo_series_ids,is.character))

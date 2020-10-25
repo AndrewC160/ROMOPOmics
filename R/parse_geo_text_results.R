@@ -1,5 +1,19 @@
-#parse_geo_text_results
-#GEO search results can be downloaded as a "text" format, and this function allows them to be parsed into a table.
+#' parse_geo_text_results
+#'
+#' Search results from GEO can be downloaded in text form, and this function 
+#' parses these into a table. More for convinience than anything, this could be
+#' useful if users want to incorporate search results they've generated on the 
+#' GEO website. To use, select the "text" option for the download and save to
+#' a text file, then point this function at that file.
+#' 
+#' @param text_file Text file location containing the "text" format of the GEO browser's results.
+#' 
+#' @import tidyverse
+#' 
+#' parse_geo_text_results()
+#' 
+#' @export
+
 parse_geo_text_results  <- function(text_file=file.path(data_dir,"ds_ids_kidney_seqencing.txt")){
   if(!file.exists(text_file)){stop(paste0("Text file specified doesn't exist:\n\t",text_file))}
   

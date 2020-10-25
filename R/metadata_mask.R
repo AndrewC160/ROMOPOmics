@@ -1,6 +1,18 @@
-#metadata_mask
+#' metadata_mask
+#' 
+#' Background function (not typically user-facing).
+#' 
+#' Function parses a metadata tibble into a mask format, including examples.
+#' 
+#' @param metadata_table Metadata table to be used.
+#' @param examples Defaults to three; how many ";" separated examples from the data should be included?
+#' 
+#' metadata_mask()
+#' 
+#' @import tidyverse
+#' 
+#' @export
 
-#metadata_table <- sum_m_data
 metadata_mask   <- function(metadata_table,examples=3){
   metadata_table %>%
     summarize_all(list) %>%
@@ -13,8 +25,8 @@ metadata_mask   <- function(metadata_table,examples=3){
     ungroup() %>%
     select(-value) %>%
     rename(alias=name) %>%
-    mutate(table="",field="") %>%
-    select(alias,table,field,everything()) %>%
+    mutate(table="",field="",field_idx="",set_value="") %>%
+    select(alias,table,field,field_idx,everything()) %>%
     return()
 }
   

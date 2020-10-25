@@ -1,4 +1,19 @@
-#check_geo_by_url
+#' check_geo_by_url
+#' 
+#' Background function (not user-facing).
+#' 
+#' Given a GSE or GDS ID, function builds a corresponding URL and tests it to 
+#' ensure the ID is valid. Returns boolean results of "url.exists()" from RCURL
+#' pacakge.
+#' 
+#' @param id_input Character string of GSE or GDS ID; i.e. "GSE15896".
+#' 
+#' @import RCurl
+#' 
+#' check_geo_by_url()
+#' 
+#' @export
+
 
 check_geo_by_url  <- function(id_input = "GSE15896"){
   url   <- case_when(
