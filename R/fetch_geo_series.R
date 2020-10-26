@@ -16,6 +16,7 @@
 #' @param data_dir Directory into which retrieved data objects should be stored. NULL by default, in which case saved to memory in a temp folder.
 #' 
 #' @import tidyverse
+#' @import stringr
 #' 
 #' fetch_geo_series()
 #' 
