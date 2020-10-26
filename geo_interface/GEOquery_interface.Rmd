@@ -264,7 +264,7 @@ Retrieving data and the metadata for a collection of IDs such as in this paper w
 
 gse_ids <- c("GSE9006", "GSE26440", "GSE11504", "TABM666", "GSE6011", "GSE37721", "GSE20307", "GSE20436")
 
-stevens_gse_lst <- fetch_geo_series(gse_ids)
+stevens_gse_lst <- fetch_geo_series(gse_ids,data_dir = data_dir)
 
 stevens_gse_lst$merged_metadata
 

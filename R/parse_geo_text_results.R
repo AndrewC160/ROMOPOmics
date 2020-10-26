@@ -9,6 +9,7 @@
 #' @param text_file Text file location containing the "text" format of the GEO browser's results.
 #' 
 #' @import tidyverse
+#' @import stringr
 #' 
 #' parse_geo_text_results()
 #' 
