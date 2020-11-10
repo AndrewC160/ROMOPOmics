@@ -11,8 +11,6 @@
 #' 
 #' @import GEOquery
 #' 
-#' parse_metadata
-#' 
 #' @export
 
 parse_metadata  <- function(object_in = NULL){

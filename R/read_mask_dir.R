@@ -9,7 +9,7 @@
 #' read_mask_dir()
 #' 
 #' @import tibble
-#' @import fread
+#' @import data.table
 #' 
 #' @export
 

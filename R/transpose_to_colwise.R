@@ -8,8 +8,6 @@
 #' @import tidyr
 #' @import dplyr
 #' 
-#' transpose_to_colwise()
-#' 
 #' @export
 
 transpose_to_colwise  <- function(input_tibble){

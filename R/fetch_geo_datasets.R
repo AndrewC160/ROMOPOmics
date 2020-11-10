@@ -18,8 +18,6 @@
 #' @import tidyverse
 #' @import stringr
 #' 
-#' fetch_geo_datasets()
-#' 
 #' @export
 
 fetch_geo_datasets  <- function(geo_dataset_ids,data_dir = NULL){

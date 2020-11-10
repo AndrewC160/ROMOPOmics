@@ -11,8 +11,6 @@
 #' @import GEOquery
 #' @import tidyverse
 #' 
-#' parse_gds_coldata()
-#' 
 #' @export
 
 parse_gds_coldata <- function(gds_in=NULL){

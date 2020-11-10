@@ -9,7 +9,7 @@
 #' @param master_table_file File containing the total data model used, including "field", "required", "type", "description" and "table" fields.
 #' @param as_table_list If TRUE, return the data model split into a list of tables rather than as one solid table.
 #'
-#' loadDataModel()
+#' loadDataModel
 #'
 #' @import tidyverse
 #' @import data.table

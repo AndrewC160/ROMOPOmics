@@ -13,8 +13,6 @@
 #' 
 #' @import tidyverse
 #' 
-#' expand_and_tpose()
-#' 
 #' @export
 
 expand_and_tpose  <- function(input_frame, rows_out=10,name_col=NULL,vals_col=NULL){

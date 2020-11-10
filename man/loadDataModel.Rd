@@ -11,7 +11,7 @@ loadDataModel(master_table_file, as_table_list = FALSE)
 
 \item{as_table_list}{If TRUE, return the data model split into a list of tables rather than as one solid table.
 
-loadDataModel()}
+loadDataModel}
 }
 \description{
 Function reads in a CSV file containing the definitions of a given data

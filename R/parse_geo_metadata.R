@@ -11,8 +11,6 @@
 #' 
 #' @import tidyverse
 #' 
-#' parse_geo_metadata()
-#' 
 #' @export
 
 parse_geo_metadata  <- function(geo_in=NULL){

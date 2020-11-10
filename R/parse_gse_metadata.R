@@ -11,8 +11,6 @@
 #' @import GEOquery
 #' @import stats
 #' 
-#' parse_gse_metadata()
-#' 
 #' @export
 
 parse_gse_metadata  <- function(gse_in=NULL){

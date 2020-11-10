@@ -10,8 +10,6 @@
 #' 
 #' @import RCurl
 #' 
-#' check_geo_by_url()
-#' 
 #' @export
 
 

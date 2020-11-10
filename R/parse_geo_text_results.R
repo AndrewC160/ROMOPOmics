@@ -11,8 +11,6 @@
 #' @import tidyverse
 #' @import stringr
 #' 
-#' parse_geo_text_results()
-#' 
 #' @export
 
 parse_geo_text_results  <- function(text_file=file.path(data_dir,"ds_ids_kidney_seqencing.txt")){

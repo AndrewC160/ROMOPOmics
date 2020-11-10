@@ -10,8 +10,6 @@
 #' 
 #' @import tidyverse
 #' 
-#' composite_geo_table()
-#' 
 #' @export
 
 composite_geo_table   <- function(geo_input=NULL){

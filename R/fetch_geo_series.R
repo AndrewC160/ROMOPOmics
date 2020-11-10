@@ -18,8 +18,6 @@
 #' @import tidyverse
 #' @import stringr
 #' 
-#' fetch_geo_series()
-#' 
 #' @export
 
 fetch_geo_series  <- function(geo_series_ids,data_dir = NULL){

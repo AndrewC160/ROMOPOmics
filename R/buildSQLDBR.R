@@ -10,13 +10,12 @@
 #' @param omop_tables Filesnames of all OMOP csv files to be incorporated into the database.
 #' @param sql_db_file Filename under which to store the SQLite database file.
 #'
+#' @export
+#'
 #' @import tidyverse
 #' @import DBI
 #' @import RSQLite
-#'
-#' buildSQLDBR()
-#'
-#' @export
+
 
 buildSQLDBR <- function(omop_tables,sql_db_file=":memory:"){
   db        <- DBI::dbConnect(RSQLite::SQLite(),sql_db_file)
