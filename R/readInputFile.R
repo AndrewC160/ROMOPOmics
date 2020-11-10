@@ -51,7 +51,8 @@ readInputFile <- function(input_file,data_model,mask_table,transpose_input_table
 
   #Expand duplicated entries into additional columns.
   out_tab   <- expand_entry_columns(table_in = in_tab)
-
+  out_tab$table <- out_tab$table %>% toupper()
+  
   #The "standard table" is now the entire data model with mapped inputs, all
   # unspecified values as NA. Each individual entry is stored in unique column.
   data_model %>%

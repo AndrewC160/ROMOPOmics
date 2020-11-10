@@ -44,7 +44,7 @@ fetch_geo_series  <- function(geo_series_ids,data_dir = NULL){
   }else{
     #Check for valid string entry.
     gdid  <- toupper(geo_series_ids)
-    if(!str_detect(gdid,pattern = "^GSE[:digit:]+$")){
+    if(!stringr::str_detect(gdid,pattern = "^GSE[:digit:]+$")){
       message('Series ID should fit the format "GSEnnnnnn".')
       return("Invalid URL.")
     }
