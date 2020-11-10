@@ -15,10 +15,17 @@ library(kableExtra)
 library(data.table)
 library(RCurl)
 library(here)
-base_dir  <- here()
-#base_dir  <- file.path(here(),"geo_interface")
-data_dir  <- file.path(base_dir,"data")
-src_dir   <- file.path(base_dir,"R")
+
+#if(interactive()){
+#  base_dir  <- file.path(here(),"geo_interface")
+#}else{
+#  base_dir  <- here()
+#}
+#data_dir  <- file.path(base_dir,"data")
+#src_dir   <- file.path(base_dir,"R")
+base_dir  <- here("geo_interface")
+data_dir  <- here("geo_interface","data")
+src_dir   <- here("geo_interface","R")
 lapply(dir(src_dir,full.names = TRUE),source)
 ```
 
@@ -73,7 +80,7 @@ md    <- geos$merged_metadata
 
 This is what the function call output resembles:
 
-![`r file.path(base_dir,"geo_import_datasets.png")`](fetch_geo_datasets() output.)
+![fetch_geo_datasets() output.](`r file.path(base_dir,"geo_import_datasets.png")`){width=50%}
 
 ## Details on the merged metadata:
 
@@ -178,7 +185,7 @@ md    <- geos$merged_metadata
 
 This is what the function call output resembles:
 
-![`r file.path(base_dir,"geo_import_series.png")`](fetch_geo_series() output.)
+![fetch_geo_series() output.](`r file.path(base_dir,"geo_import_series.png")`){width=50%}
 
 ## Example query
 
@@ -260,7 +267,7 @@ Again, we merged the metadata with dimensions: `r paste(paste(dim(geo_list$merge
 
 Retrieving data and the metadata for a collection of IDs such as in this paper would be extremely helpful for reproducing or extending published work. Here I compiled the 9 GSE IDs from the paper and I show that we can merge the metadata from all these series. The metadata fields are often redundant so great care needs to be done in cleaning these fields, but this is the beginning of converting these data into OMOP format. 
 
-```{r}
+```{r testSeries,eval=TRUE}
 
 gse_ids <- c("GSE9006", "GSE26440", "GSE11504", "TABM666", "GSE6011", "GSE37721", "GSE20307", "GSE20436")
 
