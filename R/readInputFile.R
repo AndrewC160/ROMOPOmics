@@ -46,8 +46,10 @@ readInputFile <- function(input_file,data_model,mask_table,transpose_input_table
   #Sample column names contain the base file name as a prefix.
   col_nms <- colnames(in_tab)[grep(fl_nm,colnames(in_tab))]
   #If a set_value was provided, change all corresponding table values to that.
-  set_vals<- in_tab %>% select(set_value) %>% unlist(use.names=FALSE)
-  in_tab[which(!is.na(set_vals)),col_nms] <- set_vals[which(!is.na(set_vals))]
+  if("set_value" %in% colnames(in_tab)){
+    set_vals<- in_tab %>% select(set_value) %>% unlist(use.names=FALSE)
+    in_tab[which(!is.na(set_vals)),col_nms] <- set_vals[which(!is.na(set_vals))]
+  }
 
   #Expand duplicated entries into additional columns.
   out_tab   <- expand_entry_columns(table_in = in_tab)
