@@ -1,4 +1,4 @@
-field,required,type,description,table
+﻿field,required,type,description,table
 cohort_definition_id,Yes,INTEGER,A foreign key to a record in the COHORT_DEFINITION table containing relevant Cohort Definition information.,cohort
 subject_id,Yes,INTEGER,"A foreign key to the subject in the cohort. These could be referring to records in the PERSON, PROVIDER, VISIT_OCCURRENCE table.",cohort
 cohort_start_date,Yes,DATE,"The date when the Cohort Definition criteria for the Person, Provider or Visit first match.",cohort
@@ -117,8 +117,8 @@ nlp_system,No,VARCHAR(250),Name and version of the NLP system that extracted the
 nlp_date,Yes,DATE,The date of the note processing.Useful for data provenance.,note_nlp
 nlp_datetime,No,DATETIME,The date and time of the note processing. Useful for data provenance.,note_nlp
 term_exists,No,VARCHAR(1),A summary modifier that signifies presence or absence of the term for a given patient. Useful for quick querying.,note_nlp
-term_temporal,No,VARCHAR(50),An optional time modifier associated with the extracted term. (for now “past” or “present” only). Standardize it later.,note_nlp
-term_modifiers,No,VARCHAR(2000),"A compact description of all the modifiers of the specific term extracted by the NLP system. (e.g. “son has rash” ? “negated=no,subject=family, certainty=undef,conditional=false,general=false”).",note_nlp
+term_temporal,No,VARCHAR(50),An optional time modifier associated with the extracted term. (for now ‚Äúpast‚Äù or ‚Äúpresent‚Äù only). Standardize it later.,note_nlp
+term_modifiers,No,VARCHAR(2000),"A compact description of all the modifiers of the specific term extracted by the NLP system. (e.g. ‚Äúson has rash‚Äù ? ‚Äúnegated=no,subject=family, certainty=undef,conditional=false,general=false‚Äù).",note_nlp
 observation_id,Yes,INTEGER,A unique identifier for each observation.,observation
 person_id,Yes,INTEGER,A foreign key identifier to the Person about whom the observation was recorded. The demographic details of that Person are stored in the PERSON table.,observation
 observation_concept_id,Yes,INTEGER,A foreign key to the standard observation concept identifier in the Standardized Vocabularies.,observation
@@ -158,7 +158,7 @@ location_id,No,INTEGER,"A foreign key to the place of residency for the person i
 provider_id,No,INTEGER,A foreign key to the primary care provider the person is seeing in the provider table.,person
 care_site_id,No,INTEGER,"A foreign key to the site of primary care in the care_site table, where the details of the care site are stored.",person
 person_source_value,No,VARCHAR(50),An (encrypted) key derived from the person identifier in the source data. This is necessary when a use case requires a link back to the person data at the source dataset.,person
-gender_source_value,No,VARCHAR(50),The source code for the gender of the person as it appears in the source data. The person’s gender is mapped to a standard gender concept in the Standardized Vocabularies; the original value is stored here for reference.,person
+gender_source_value,No,VARCHAR(50),The source code for the gender of the person as it appears in the source data. The person‚Äôs gender is mapped to a standard gender concept in the Standardized Vocabularies; the original value is stored here for reference.,person
 gender_source_concept_id,Yes,INTEGER,A foreign key to the gender concept that refers to the code used in the source.,person
 race_source_value,No,VARCHAR(50),The source code for the race of the person as it appears in the source data. The person race is mapped to a standard race concept in the Standardized Vocabularies and the original value is stored here for reference.,person
 race_source_concept_id,Yes,INTEGER,A foreign key to the race concept that refers to the code used in the source.,person
@@ -201,12 +201,12 @@ survey_start_date,No,DATE,Date on which the survey was started.,survey_conduct
 survey_start_datetime,No,DATETIME,Date and time the survey was started.,survey_conduct
 survey_end_date,Yes,DATE,Date on which the survey was completed.,survey_conduct
 survey_end_datetime,No,DATETIME,Date and time the survey was completed.,survey_conduct
-provider_id,No�,INTEGER�,A foreign key to the provider in the provider table who was associated with the survey completion.,survey_conduct
+provider_id,No¬,INTEGER¬,A foreign key to the provider in the provider table who was associated with the survey completion.,survey_conduct
 assisted_concept_id,Yes,INTEGER,A foreign key to the predefined Concept identifier in the Standardized Vocabularies indicating whether the survey was completed with assistance.,survey_conduct
 respondent_type_concept_id,Yes,INTEGER,"A foreign key to the predefined Concept identifier in the Standardized Vocabularies reflecting the respondent type. Example: Research Associate, Patient.",survey_conduct
 timing_concept_id,Yes,INTEGER,"A foreign key to the predefined Concept identifier in the Standardized Vocabularies that refers to a certain timing. Example: 3 month follow-up, 6 month follow-up.",survey_conduct
 collection_method_concept_id,Yes,INTEGER,"A foreign key to the predefined Concept identifier in the Standardized Vocabularies reflecting the data collection method (e.g. Paper, Telephone, Electronic Questionnaire).",survey_conduct
-assisted_source_value,No,VARCHAR(50),"Source value representing whether patient required assistance to complete the survey. Example: “Completed without assistance”, ”Completed with assistance”.",survey_conduct
+assisted_source_value,No,VARCHAR(50),"Source value representing whether patient required assistance to complete the survey. Example: ‚ÄúCompleted without assistance‚Äù, ‚ÄùCompleted with assistance‚Äù.",survey_conduct
 respondent_type_source_value,No,VARCHAR(100),Source code representing role of person who completed the survey.,survey_conduct
 timing_source_value,No,VARCHAR(100),"Text string representing the timing of the survey. Example: Baseline, 6-month follow-up.",survey_conduct
 collection_method_source_value,No,VARCHAR(100),The collection method as it appears in the source data.,survey_conduct
@@ -216,8 +216,8 @@ survey_source_identifier,No,VARCHAR(100),Unique identifier for each completed su
 validated_survey_concept_id,Yes,INTEGER,A foreign key to the predefined Concept identifier in the Standardized Vocabularies reflecting the validation status of the survey.,survey_conduct
 validated_survey_source_value,No,INTEGER,Source value representing the validation status of the survey.,survey_conduct
 survey_version_number,No,VARCHAR(20),Version number of the questionnaire or survey used.,survey_conduct
-visit_occurrence_id,No,INTEGER,A foreign key to the VISIT_OCCURRENCE table during which the survey was completed,survey_conduct
-response_visit_occurrence_id,No,INTEGER�,A foreign key to the visit in the VISIT_OCCURRENCE table during which treatment was carried out that relates to this survey.,survey_conduct
+visit_occurrence_id,No,INTEGER,A foreign key to the VISIT_OCCURRENCE table during which the¬†survey was completed,survey_conduct
+response_visit_occurrence_id,No,INTEGER¬,A foreign key to the visit in the VISIT_OCCURRENCE table during which treatment was carried out that relates to this survey.,survey_conduct
 visit_detail_id,Yes,INTEGER,A unique identifier for each Person's visit or encounter at a healthcare provider.,visit_detail
 person_id,Yes,INTEGER,A foreign key identifier to the Person for whom the visit is recorded. The demographic details of that Person are stored in the PERSON table.,visit_detail
 visit_detail_concept_id,Yes,INTEGER,A foreign key that refers to a visit Concept identifier in the Standardized Vocabularies belonging to the 'Visit' Vocabulary.,visit_detail
@@ -449,3 +449,4 @@ file_remote_repo_value,No,VARCHAR(50),Remote file repository. CUSTOM,sequencing
 file_remote_repo_id,No,VARCHAR(50),Remote file repository ID. CUSTOM,sequencing
 file_remote_source_url,No,VARCHAR(255),Remote file URL. CUSTOM,sequencing
 sequencing_date,No,DATE,The date associated with the time of the sequencing event. CUSTOM,sequencing
+cohort_file_local_source,No,VARCHAR(50),File for cohort. CUSTOM,cohort
