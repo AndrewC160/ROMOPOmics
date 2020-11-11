@@ -10,6 +10,7 @@
 #' 
 #' expand_entry_columns()
 #' 
+#' @import data.table
 #' @import tidyverse
 #' 
 #' @export
