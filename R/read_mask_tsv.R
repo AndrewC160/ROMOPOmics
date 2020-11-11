@@ -8,8 +8,8 @@
 #' 
 #' read_mask_tsv()
 #' 
-#' @import tibble
 #' @import data.table
+#' @import tidyverse
 #' 
 #' @export
 

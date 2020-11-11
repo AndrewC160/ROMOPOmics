@@ -14,8 +14,6 @@
 #' getDependencies()
 #'
 #' @import tidyverse
-#' @import data.table
-#' @import magrittr
 #'
 
 getDependencies   <- function(data_model=loadDataModel(),inc_tabs,return_matrix=FALSE){
