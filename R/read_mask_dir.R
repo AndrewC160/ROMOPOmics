@@ -9,7 +9,6 @@
 #' read_mask_dir()
 #' 
 #' @import tibble
-#' @import data.table
 #' 
 #' @export
 

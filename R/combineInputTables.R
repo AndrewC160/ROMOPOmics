@@ -11,8 +11,8 @@
 #'
 #' combineInputTables()
 #'
-#' @import tidyverse
 #' @import data.table
+#' @import tidyverse
 #'
 #' @export
 

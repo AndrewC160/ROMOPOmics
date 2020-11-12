@@ -10,6 +10,7 @@
 #' 
 #' expand_entry_columns()
 #' 
+#' @import data.table
 #' @import tidyverse
 #' 
 #' @export
@@ -24,12 +25,23 @@ expand_entry_columns  <- function(table_in){
   col_nms   <- colnames(table_in)[!colnames(table_in) %in% c("table","field","field_idx","alias","set_value")]
   lapply(unique(na.omit(table_in$field_idx)), function(x) {
     table_in %>% 
+<<<<<<< HEAD
       dplyr::filter(is.na(field_idx) | field_idx == x) %>%
       dplyr::mutate(field_idx = x)}
     ) %>%
+||||||| merged common ancestors
+      filter(is.na(field_idx) | field_idx == x) %>%
+      mutate(field_idx = x)}
+    ) %>%
+=======
+      filter(is.na(field_idx) | field_idx == x) %>%
+      mutate(field_idx = x)
+    }) %>%
+>>>>>>> 879b46dda814b6f8ac4f78c05d8611c6462eb728
     do.call(rbind,.) %>%
     pivot_wider(id_cols =  c(table,field),
                 names_from = field_idx,
                 values_from = col_nms) %>%
     return()
 }
+
