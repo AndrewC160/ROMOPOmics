@@ -17,6 +17,10 @@
 #' @export
 
 combineInputTables  <- function(input_table_list){
+  select <- dplyr::select
+  filter <- dplyr::filter
+  mutate <- dplyr::mutate
+  
   #Check if only one table was included, and if so en-list it.
   if(!inherits(input_table_list,"list")){
     input_table_list<- list(input_table_list)
@@ -32,10 +36,10 @@ combineInputTables  <- function(input_table_list){
                 dplyr::mutate(is_used=rowSums(!is.na(select(.,-table)))>0) %>%
                 dplyr::filter(is_used) %>%
                 dplyr::select(table) %>% unlist(use.names=FALSE) %>% unique()
-  full_tb   <- filter(full_tb,table %in% used_tbs)
+  full_tb   <- dplyr::filter(full_tb,table %in% used_tbs)
 
   #Col_data contains all meta data for each field.
-  col_data  <- select(full_tb,table_field,field,table,required,type,description,table_index)
+  col_data  <- dplyr::select(full_tb,table_field,field,table,required,type,description,table_index)
 
   #tb is a minimal tibble with a table|field column that indexes back to the full table.
   tb        <- dplyr::filter(full_tb,!table_index) %>%
