@@ -9,7 +9,7 @@
 #' read_mask_tsv()
 #' 
 #' @importFrom data.table fread
-#' @import tidyverse
+#' @import dplyr
 #' 
 #' @export
 

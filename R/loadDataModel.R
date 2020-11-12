@@ -12,7 +12,7 @@
 #' loadDataModel
 #'
 #' @importFrom data.table fread
-#' @import tidyverse
+#' @import dplyr
 #' @import magrittr
 #'
 #' @export

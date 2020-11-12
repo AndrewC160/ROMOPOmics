@@ -17,7 +17,8 @@
 #' readInputFile
 #'
 #' @importFrom data.table fread
-#' @import tidyverse
+#' @import dplyr
+#' @import tidyr
 #'
 #' @export
 

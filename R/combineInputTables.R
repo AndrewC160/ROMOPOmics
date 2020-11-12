@@ -12,7 +12,9 @@
 #' combineInputTables()
 #'
 #' @importFrom data.table fread
-#' @import tidyverse
+#' @import dplyr
+#' @import tidyr
+#' @import stringr
 #'
 #' @export
 
@@ -35,7 +37,7 @@ combineInputTables  <- function(input_table_list){
                 select(table) %>% 
                 unlist(use.names=FALSE) %>% 
                 unique() %>%
-                
+                na.omit()
   full_tb   <- filter(full_tb,table %in% used_tbs)
 
   #col_data contains all meta data for each field.
@@ -43,15 +45,9 @@ combineInputTables  <- function(input_table_list){
 
   #tb is a minimal tibble with a table|field column that indexes back to the full table.
   tb        <- filter(full_tb,!table_index) %>%
-                select(table_field,
-                       everything(),
-                       -field,-table,-required,-type,-description,-table_index) #-set_value
-  cn        <- tb$table_field
-  tb        <- tb %>%
-                select(-table_field) %>%
-                as.matrix() %>% t() %>%
-                as_tibble(.name_repair = "minimal")
-  colnames(tb)<- cn
+                select(-field,-table,-required,-type,-description,-table_index) %>%
+                pivot_longer(cols = -table_field) %>%
+                pivot_wider(id_cols=name,names_from = table_field,values_from=value)
   for(tb_name in rev(used_tbs)){
     idx_col   <- paste0(tb_name,"|",tolower(tb_name),"_id")
     flds      <- col_data %>% filter(table==tb_name,!table_index) %>% select(table_field) %>% unlist(use.names=FALSE)
@@ -61,24 +57,12 @@ combineInputTables  <- function(input_table_list){
       select(!!as.name(idx_col),everything()) %>%
       ungroup()
   }
-
-  #Return a list of formatted OMOP tables.
-  tbl_lst      <- vector(mode = "list",length = length(used_tbs))
-  names(tbl_lst) <- used_tbs
-  for(tb_name in rev(used_tbs)){
-    cd        <- filter(col_data,table==tb_name) %>%
-                  arrange(!table_index)
-    all_cols  <- filter(cd,!table_index) %>% select(table_field) %>% unlist(use.names=FALSE)
-    idx_cols  <- cd %>% filter(table_index) %>% select(field) %>% unlist(use.names=FALSE)
-    col_types <- interpret_class(cd$type)
-    names(col_types)  <- cd$table_field
-    tb_out    <- select(tb,ends_with(idx_cols),all_of(all_cols))
-    x <- list()
-    for(i in all_cols){
-      x <-  c(x,interpret_class(filter(cd,table_field==i) %>% select(type) %>% unlist()))
-    }
-    tbl_lst[[tb_name]]  <- rename_all(tb_out,function(x) str_extract(x,"[^\\|]+$")) %>%
-                            distinct()
-  }
+  
+  tbl_lst       <- lapply(used_tbs, function(tb_nm){
+    select(tb,starts_with(tb_nm)) %>%
+      rename_all(function(x) str_extract(x,"[^\\|]+$")) %>%
+      distinct()
+  })
+  names(tbl_lst)<- used_tbs
   return(tbl_lst)
 }

@@ -5,7 +5,8 @@
 #' 
 #' @param input_tibble Any tibble (no rownames, obviously).
 #' 
-#' @import tidyverse
+#' @import tidyr
+#' @import dplyr
 #' 
 #' @export
 
