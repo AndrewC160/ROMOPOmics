@@ -430,7 +430,7 @@ vocabulary_concept_id,Yes,INTEGER,A foreign key that refers to a standard concep
 sequencing_id,Yes,INTEGER,A unique identifier for each sequencing entry. CUSTOM,sequencing
 person_id,Yes,INTEGER,A foreign key identifier to the Person who is experiencing the condition. The demographic details of that Person are stored in the PERSON table. CUSTOM,sequencing
 specimen_id,Yes,INTEGER,A unique identifier for each specimen. CUSTOM,sequencing
-sequencing_source_value,Yes,VARCHAR,Sequencing run identification (text). CUSTOM,
+sequencing_source_value,Yes,VARCHAR,Sequencing run identification (text). CUSTOM,sequencing
 library_concept_value,Yes,VARCHAR(50),Sequencing library type (text). CUSTOM,sequencing
 library_source_value,No,VARCHAR(50),Sequencing library source kit (text). CUSTOM,sequencing
 library_paired_end,No,INTEGER,Boolean; library is paired end. CUSTOM,sequencing
@@ -449,4 +449,8 @@ file_remote_repo_value,No,VARCHAR(50),Remote file repository. CUSTOM,sequencing
 file_remote_repo_id,No,VARCHAR(50),Remote file repository ID. CUSTOM,sequencing
 file_remote_source_url,No,VARCHAR(255),Remote file URL. CUSTOM,sequencing
 sequencing_date,No,DATE,The date associated with the time of the sequencing event. CUSTOM,sequencing
-cohort_file_local_source,No,VARCHAR(50),File for cohort. CUSTOM,cohort
+evs_cohort_file_local_source,No,VARCHAR(50),File for cohort. CUSTOM,evs_cohort
+evs_cohort_name,No,VARCHAR(50),A foreign key to a record in the EVS_COHORT_DEFINITION table containing relevant Cohort Definition information. Custom,evs_cohort
+evs_cohort_definition_name,No,VARCHAR(50),A foreign key to a record in the EVS_COHORT_DEFINITION table containing relevant Cohort Definition information. Custom,evs_cohort_definition
+evs_cohort_definition_disease,No,VARCHAR(50),"The ""collection source"" or disease from which those in the collection are from. Custom",evs_cohort_definition
+evs_cohort_definition_type,No,VARCHAR(50),The definition type of the evs cohort. Custom,evs_cohort_definition
