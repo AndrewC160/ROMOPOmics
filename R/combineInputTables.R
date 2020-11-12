@@ -15,6 +15,7 @@
 #' @import dplyr
 #' @import tidyr
 #' @import stringr
+#' @importFrom stats setNames
 #'
 #' @export
 
@@ -32,32 +33,30 @@ combineInputTables  <- function(input_table_list){
   #Figure out used OMOP tables (those with any input fields).
   used_tbs  <- full_tb %>%
                 select(-field,-required,-type,-description,-table_index,-table_field) %>%
-                mutate(is_used=rowSums(!is.na(select(.,-table)))>0) %>%
-                filter(is_used) %>%
+                pivot_longer(-table) %>%
+                group_by(table) %>% 
+                summarize(is_used = any(!is.na(value)),.groups="drop") %>%
+                filter(is_used,!is.na(table)) %>%
                 select(table) %>% 
-                unlist(use.names=FALSE) %>% 
-                unique() %>%
-                na.omit()
+                unlist(use.names=FALSE)
   full_tb   <- filter(full_tb,table %in% used_tbs)
-
-  #col_data contains all meta data for each field.
-  col_data  <- select(full_tb,table_field,field,table,required,type,description,table_index)
-
-  #tb is a minimal tibble with a table|field column that indexes back to the full table.
-  tb        <- filter(full_tb,!table_index) %>%
+  tb        <- full_tb %>%
                 select(-field,-table,-required,-type,-description,-table_index) %>%
                 pivot_longer(cols = -table_field) %>%
                 pivot_wider(id_cols=name,names_from = table_field,values_from=value)
-  for(tb_name in rev(used_tbs)){
-    idx_col   <- paste0(tb_name,"|",tolower(tb_name),"_id")
-    flds      <- col_data %>% filter(table==tb_name,!table_index) %>% select(table_field) %>% unlist(use.names=FALSE)
-    tb        <- tb %>%
-      group_by_at(flds) %>%
-      mutate(!!as.name(idx_col):=cur_group_id()) %>%
-      select(!!as.name(idx_col),everything()) %>%
-      ungroup()
+  #Group, sort, and index each table together.
+  for(tab_nm in used_tbs){
+    idx_nm  <- paste0(tolower(tab_nm),"_id")
+    idx_col <- paste0(tab_nm,"|",idx_nm)
+    flds    <- select(tb,starts_with(tab_nm)) %>% colnames()
+    tb      <- tb %>%
+                group_by_at(flds) %>%
+                mutate(!!as.name(idx_col):=cur_group_id()) %>%
+                select(!!as.name(idx_col),everything()) %>%
+                ungroup() %>%
+                mutate_at(vars(ends_with(idx_nm)), function(x) unlist(select(.,idx_col))) %>%
+                arrange(!!as.name(idx_col))
   }
-  
   tbl_lst       <- lapply(used_tbs, function(tb_nm){
     select(tb,starts_with(tb_nm)) %>%
       rename_all(function(x) str_extract(x,"[^\\|]+$")) %>%
