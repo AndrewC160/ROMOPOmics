@@ -14,7 +14,7 @@
 #' loadModelMasks()
 #'
 #' @import tibble
-#' @import data.table
+#' @importFrom data.table fread
 #' @import magrittr
 #'
 #' @export

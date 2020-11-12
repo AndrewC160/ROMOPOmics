@@ -9,7 +9,7 @@
 #' 
 #' @import tidyverse
 #' @import GEOquery
-#' @import stats
+#' @importFraom stats setNames
 #' 
 #' @export
 

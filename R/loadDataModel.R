@@ -11,8 +11,9 @@
 #'
 #' loadDataModel
 #'
-#' @import data.table
+#' @importFrom data.table fread
 #' @import tidyverse
+#' @import magrittr
 #'
 #' @export
 

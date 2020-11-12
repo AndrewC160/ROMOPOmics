@@ -16,7 +16,7 @@
 #'
 #' @import tidyverse
 #' @import DBI
-#' @import data.table
+#' @importFrom data.table fread
 #' @import RSQLite
 #'
 #' @export

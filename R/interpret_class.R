@@ -9,7 +9,7 @@
 #'
 #' interpret_class()
 #'
-#' @import data.table
+#' @importFrom data.table fread
 #' @import tidyverse
 #'
 #' @export

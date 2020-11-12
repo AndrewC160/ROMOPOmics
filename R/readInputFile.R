@@ -16,7 +16,7 @@
 #'
 #' readInputFile
 #'
-#' @import data.table
+#' @importFrom data.table fread
 #' @import tidyverse
 #'
 #' @export
@@ -34,12 +34,12 @@ readInputFile <- function(input_file,data_model,mask_table,transpose_input_table
   in_tab  <- in_tab %>%
               rename_all(function(x) paste0("V",c(0:(length(x)-1)))) %>%
               rename(alias=V0) %>%
-              merge(.,dplyr::select(mask_table,table,alias,field,field_idx,set_value),
+              merge(.,select(mask_table,table,alias,field,field_idx,set_value),
                     by="alias",all.x = TRUE, all.y=TRUE) %>%
               drop_na(table) %>% 
               as_tibble() %>%
               rename_at(vars(starts_with("V")), function(x) gsub("V",fl_nm,x)) %>%
-              dplyr::select(table,field,field_idx,alias,set_value,everything()) %>%
+              select(table,field,field_idx,alias,set_value,everything()) %>%
               mutate_all(function(x) ifelse(x=="",NA,x)) %>%
               select_if(function(x) !all(is.na(x)))
 

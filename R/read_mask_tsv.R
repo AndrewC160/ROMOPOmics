@@ -8,7 +8,7 @@
 #' 
 #' read_mask_tsv()
 #' 
-#' @import data.table
+#' @importFrom data.table fread
 #' @import tidyverse
 #' 
 #' @export

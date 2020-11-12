@@ -11,15 +11,12 @@
 #'
 #' combineInputTables()
 #'
-#' @import data.table
+#' @importFrom data.table fread
 #' @import tidyverse
 #'
 #' @export
 
 combineInputTables  <- function(input_table_list){
-  select <- dplyr::select
-  filter <- dplyr::filter
-  mutate <- dplyr::mutate
   
   #Check if only one table was included, and if so en-list it.
   if(!inherits(input_table_list,"list")){
@@ -28,27 +25,30 @@ combineInputTables  <- function(input_table_list){
   #Reference that includes ALL columns, including IDs and fields with identical names.
   full_tb   <- Reduce(function(x,y) merge(x,y,all=TRUE),input_table_list) %>%
                 as_tibble() %>%
-                dplyr::mutate(table_field = paste(table,field,sep="|")) %>%
-                dplyr::select(table_field,everything())
+                mutate(table_field = paste(table,field,sep="|")) %>%
+                select(table_field,everything())
   #Figure out used OMOP tables (those with any input fields).
   used_tbs  <- full_tb %>%
-                dplyr::select(-field,-required,-type,-description,-table_index,-table_field) %>%
-                dplyr::mutate(is_used=rowSums(!is.na(select(.,-table)))>0) %>%
-                dplyr::filter(is_used) %>%
-                dplyr::select(table) %>% unlist(use.names=FALSE) %>% unique()
-  full_tb   <- dplyr::filter(full_tb,table %in% used_tbs)
+                select(-field,-required,-type,-description,-table_index,-table_field) %>%
+                mutate(is_used=rowSums(!is.na(select(.,-table)))>0) %>%
+                filter(is_used) %>%
+                select(table) %>% 
+                unlist(use.names=FALSE) %>% 
+                unique() %>%
+                
+  full_tb   <- filter(full_tb,table %in% used_tbs)
 
-  #Col_data contains all meta data for each field.
-  col_data  <- dplyr::select(full_tb,table_field,field,table,required,type,description,table_index)
+  #col_data contains all meta data for each field.
+  col_data  <- select(full_tb,table_field,field,table,required,type,description,table_index)
 
   #tb is a minimal tibble with a table|field column that indexes back to the full table.
-  tb        <- dplyr::filter(full_tb,!table_index) %>%
-                dplyr::select(table_field,
+  tb        <- filter(full_tb,!table_index) %>%
+                select(table_field,
                        everything(),
                        -field,-table,-required,-type,-description,-table_index) #-set_value
   cn        <- tb$table_field
   tb        <- tb %>%
-                dplyr::select(-table_field) %>%
+                select(-table_field) %>%
                 as.matrix() %>% t() %>%
                 as_tibble(.name_repair = "minimal")
   colnames(tb)<- cn
@@ -57,8 +57,8 @@ combineInputTables  <- function(input_table_list){
     flds      <- col_data %>% filter(table==tb_name,!table_index) %>% select(table_field) %>% unlist(use.names=FALSE)
     tb        <- tb %>%
       group_by_at(flds) %>%
-      dplyr::mutate(!!as.name(idx_col):=cur_group_id()) %>%
-      dplyr::select(!!as.name(idx_col),everything()) %>%
+      mutate(!!as.name(idx_col):=cur_group_id()) %>%
+      select(!!as.name(idx_col),everything()) %>%
       ungroup()
   }
 
@@ -72,10 +72,9 @@ combineInputTables  <- function(input_table_list){
     idx_cols  <- cd %>% filter(table_index) %>% select(field) %>% unlist(use.names=FALSE)
     col_types <- interpret_class(cd$type)
     names(col_types)  <- cd$table_field
-    tb_out    <- select(tb,ends_with(idx_cols),all_cols)
+    tb_out    <- select(tb,ends_with(idx_cols),all_of(all_cols))
     x <- list()
     for(i in all_cols){
-      #class(tb_out[[i]])<- interpret_class(filter(cd,table_field==i) %>% select(type) %>% unlist())
       x <-  c(x,interpret_class(filter(cd,table_field==i) %>% select(type) %>% unlist()))
     }
     tbl_lst[[tb_name]]  <- rename_all(tb_out,function(x) str_extract(x,"[^\\|]+$")) %>%

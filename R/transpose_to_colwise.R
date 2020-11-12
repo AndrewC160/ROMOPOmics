@@ -5,15 +5,16 @@
 #' 
 #' @param input_tibble Any tibble (no rownames, obviously).
 #' 
-#' @import tidyr
-#' @import dplyr
+#' @import tidyverse
 #' 
 #' @export
 
 transpose_to_colwise  <- function(input_tibble){
+  #class_vec <- sapply(colnames(input_tibble), function(x) class(select(input_tibble,x) %>% unlist()))
   input_tibble %>%
-    dplyr::mutate(rowname=paste0("V",row_number()+1)) %>%
-    tidyr::gather(V1,value,-rowname) %>%
-    tidyr::pivot_wider(names_from = rowname,values_from=value) %>%
+    mutate(rowname=paste0("V",row_number()+1)) %>%
+    mutate_all(as.character) %>%
+    pivot_longer(-rowname) %>%
+    pivot_wider(names_from = rowname,values_from=value) %>%
     return()
 }

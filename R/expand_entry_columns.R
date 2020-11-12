@@ -10,7 +10,7 @@
 #' 
 #' expand_entry_columns()
 #' 
-#' @import data.table
+#' @importFrom data.table fread
 #' @import tidyverse
 #' 
 #' @export
