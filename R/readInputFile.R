@@ -45,6 +45,7 @@ readInputFile <- function(input_file,data_model,mask_table,transpose_input_table
 
   #Sample column names contain the base file name as a prefix.
   col_nms <- colnames(in_tab)[grep(fl_nm,colnames(in_tab))]
+  
   #If a set_value was provided, change all corresponding table values to that.
   if("set_value" %in% colnames(in_tab)){
     set_vals<- in_tab %>% select(set_value) %>% unlist(use.names=FALSE)

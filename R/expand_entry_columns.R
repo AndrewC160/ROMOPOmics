@@ -24,8 +24,8 @@ expand_entry_columns  <- function(table_in){
   col_nms   <- colnames(table_in)[!colnames(table_in) %in% c("table","field","field_idx","alias","set_value")]
   lapply(unique(na.omit(table_in$field_idx)), function(x) {
     table_in %>% 
-      filter(is.na(field_idx) | field_idx == x) %>%
-      mutate(field_idx = x)}
+      dplyr::filter(is.na(field_idx) | field_idx == x) %>%
+      dplyr::mutate(field_idx = x)}
     ) %>%
     do.call(rbind,.) %>%
     pivot_wider(id_cols =  c(table,field),
