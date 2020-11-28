@@ -9,7 +9,7 @@
 #' as long as the same data model was used. As such, the output tables are
 #' "exhaustive" in that no unused columns are dropped.
 #'
-#' @param input_file Name of a TSV file containing required alias column names.
+#' @param input_file Name of a TSV/CSV file containing required alias column names.
 #' @param data_model Data model being used, typically as a tibble returned by loadDataModel().
 #' @param mask_table Mask contained in a tibble, typically as a tibble loaded by loadModelMask().
 #' @param transpose_input_table Boolean; defaults to FALSE. If TRUE, transpose tables with one row per treatment/sample to one per column.

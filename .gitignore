@@ -38,3 +38,4 @@ sqlDB.sqlite
 *.soft
 *.txt
 *.tsv
+inst/doc
