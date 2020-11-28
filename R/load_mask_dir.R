@@ -13,13 +13,13 @@
 #' @export
 
 load_mask_dir <- function(dir_name){
-  mask_fls    <- Sys.glob(file.path(dir_name,"*.tsv"))
+  mask_fls    <- Sys.glob(file.path(dir_name,"*.[ct]sv"))
   if(identical(mask_fls,character(0))){
     stop(paste0("No mask files ending in '.tsv' found in ",dir_name,"."))
   }
-  nms         <- gsub("_mask.tsv","",basename(mask_fls))
-  nms         <- gsub(".tsv$","",nms)
-  masks       <- lapply(mask_fls,read_mask_tsv)
+  nms         <- gsub("_mask.[ct]sv","",basename(mask_fls))
+  nms         <- gsub(".[ct]sv$","",nms)
+  masks       <- lapply(mask_fls,read_mask)
   names(masks)<- nms
   return(masks)
 }
