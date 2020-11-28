@@ -29,10 +29,10 @@ loadModelMasks<- function(mask_files){
   
   #Read individual files.
   fls_inputs  <- sapply(mask_files,file.exists) & !dir_inputs
-  fls_msks    <- lapply(mask_files[fls_inputs],read_mask_tsv)
+  fls_msks    <- lapply(mask_files[fls_inputs],read_mask)
   nms         <- names(mask_files)[fls_inputs]
   if(is.null(nms)){
-    nms       <- gsub("\\.tsv$","",basename(mask_files[fls_inputs]))
+    nms       <- gsub("\\.[ct]sv$","",basename(mask_files[fls_inputs]))
     nms       <- gsub("_mask$","",nms)
   }
   names(fls_msks) <- nms
