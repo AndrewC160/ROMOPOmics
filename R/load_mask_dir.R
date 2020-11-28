@@ -1,4 +1,4 @@
-#' read_mask_dir
+#' load_mask_dir
 #' 
 #' Given a directory containing mask TSV files, read each and approximate a 
 #' a name from the file name (basename, and remove "_mask.tsv"). Throws an 
@@ -6,7 +6,7 @@
 #' 
 #' @param dir_name Name of directory to search for masks.
 #' 
-#' read_mask_dir()
+#' load_mask_dir()
 #' 
 #' @import tibble
 #' 

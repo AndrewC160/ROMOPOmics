@@ -1,6 +1,6 @@
 ---
 title: "ROMOPOmics - An OMOPOmics R package"
-date: "08 August, 2020"
+date: "27 November, 2020"
 output:
   html_document:
     toc: true
@@ -27,7 +27,7 @@ ROMOPOmics was developed to standardize metadata of high throughput assays with 
 
 ### [The OMOP common data model](https://www.ohdsi.org/data-standardization/the-common-data-model) 
 
-The CDM allows for standardizing patient clinical data. The foundation of the ROMOPOmics package is the [common data model](https://github.com/OHDSI/CommonDataModel/blob/master/OMOP_CDM_v6_0.csv) developed by the Observational Medical Outcomes Partnership Medicine and now used by the Observational Health Data Sciences and Informatics network. The data model contains all the fields and tables for standardizing patient clinical data in the OMOP framework. Unless a custom data model is provided, the package defaults to using a custom version of the OMOP 6.0 data model which is packaged within `extdata`. The OMOP data model includes 448 fields distributed among 39 tables. We use the CDM with a few custom characteristics. First, we include an `hla_source_value` field in the `PERSON` table meant to incorporate [histocompatibility complex types](https://www.merckmanuals.com/professional/immunology-allergic-disorders/biology-of-the-immune-system/human-leukocyte-antigen-hla-system) as a key individual characteristic rather than as a separate observation. Second, our customized version includes a `SEQUENCING` table: 
+The CDM allows for standardizing patient clinical data. The foundation of the ROMOPOmics package is the [common data model](https://github.com/OHDSI/CommonDataModel/blob/master/OMOP_CDM_v6_0.csv) developed by the Observational Medical Outcomes Partnership Medicine and now used by the Observational Health Data Sciences and Informatics network. The data model contains all the fields and tables for standardizing patient clinical data in the OMOP framework. Unless a custom data model is provided, the package defaults to using a custom version of the OMOP 6.0 data model which is packaged within `extdata`. The OMOP data model includes 455 fields distributed among 41 tables. We use the CDM with a few custom characteristics. First, we include an `hla_source_value` field in the `PERSON` table meant to incorporate [histocompatibility complex types](https://www.merckmanuals.com/professional/immunology-allergic-disorders/biology-of-the-immune-system/human-leukocyte-antigen-hla-system) as a key individual characteristic rather than as a separate observation. Second, our customized version includes a `SEQUENCING` table: 
 
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
  <thead>
@@ -59,6 +59,13 @@ The CDM allows for standardizing patient clinical data. The foundation of the RO
    <td style="text-align:left;"> Yes </td>
    <td style="text-align:left;"> INTEGER </td>
    <td style="text-align:left;"> A unique identifier for each specimen. </td>
+   <td style="text-align:left;"> sequencing </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> sequencing source value </td>
+   <td style="text-align:left;"> Yes </td>
+   <td style="text-align:left;"> VARCHAR </td>
+   <td style="text-align:left;"> Sequencing run identification (text). </td>
    <td style="text-align:left;"> sequencing </td>
   </tr>
   <tr>
@@ -180,6 +187,13 @@ The CDM allows for standardizing patient clinical data. The foundation of the RO
    <td style="text-align:left;"> Remote file URL. </td>
    <td style="text-align:left;"> sequencing </td>
   </tr>
+  <tr>
+   <td style="text-align:left;"> sequencing date </td>
+   <td style="text-align:left;"> No </td>
+   <td style="text-align:left;"> DATE </td>
+   <td style="text-align:left;"> The date associated with the time of the sequencing event. </td>
+   <td style="text-align:left;"> sequencing </td>
+  </tr>
 </tbody>
 </table>
 
@@ -213,7 +227,7 @@ msks <- loadModelMasks(mask_files = dirs$masks)
 ```
 
 
-"Masks" streamline the mapping of values from existing data sets to OMOP format, or at least to how the database's *administrator* thinks these data sets should be mapped. See the files in /data/projects/andrew/ROMOPOmics/demo/masks for examples of masks files used here. 
+"Masks" streamline the mapping of values from existing data sets to OMOP format, or at least to how the database's *administrator* thinks these data sets should be mapped. See the files in /Users/nickgiangreco/GitHub/ROMOPOmics/demo/masks for examples of masks files used here. 
 
 Mask files are tables which provide `alias`, `table`, and `field` columns that describe each term's name in the input dataset, its destination OMOP table, and name within that table, respectively. For instance, `patient_name` in the user's database will likely map to `person_source_value` in current OMOP parlance. Using multiple masks should streamline the use of multiple analysis types as well: the database administrators can develop and implement masks and users won't need to know that `patient_name` and `cell_line_name` are both synonymous with `person_source_value` in the OMOP framework, for instance. Next generation sequencing data can be added using the `sequencing` mask, while "HLA"" data can be incorporated using an `hla` mask. 
 
@@ -514,15 +528,16 @@ dbListFields(omop_db,"PERSON")
 ```
 
 ```
-##  [1] "person_id"                   "provider_id"                
-##  [3] "birth_datetime"              "day_of_birth"               
+##  [1] "person_id"                   "birth_datetime"             
+##  [3] "care_site_id"                "day_of_birth"               
 ##  [5] "death_datetime"              "ethnicity_concept_id"       
 ##  [7] "ethnicity_source_concept_id" "ethnicity_source_value"     
 ##  [9] "gender_concept_id"           "gender_source_concept_id"   
 ## [11] "gender_source_value"         "hla_source_value"           
-## [13] "month_of_birth"              "person_source_value"        
-## [15] "race_concept_id"             "race_source_concept_id"     
-## [17] "race_source_value"           "year_of_birth"
+## [13] "location_id"                 "month_of_birth"             
+## [15] "person_source_value"         "provider_id"                
+## [17] "race_concept_id"             "race_source_concept_id"     
+## [19] "race_source_value"           "year_of_birth"
 ```
 
 ### Raw SQLite query
@@ -798,14 +813,6 @@ inner_join(tbl(omop_db,"PERSON"),
    <td style="text-align:left;"> tcga-a1-a0sk </td>
    <td style="text-align:left;"> 10/17/1956 </td>
    <td style="text-align:left;"> 5/1/2014 </td>
-   <td style="text-align:left;"> lymph nodes examined </td>
-   <td style="text-align:left;"> 4 </td>
-   <td style="text-align:left;"> nodes </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> tcga-a1-a0sk </td>
-   <td style="text-align:left;"> 10/17/1956 </td>
-   <td style="text-align:left;"> 5/1/2014 </td>
    <td style="text-align:left;"> lymph node he </td>
    <td style="text-align:left;"> 0 </td>
    <td style="text-align:left;"> nodes </td>
@@ -816,6 +823,14 @@ inner_join(tbl(omop_db,"PERSON"),
    <td style="text-align:left;"> 5/1/2014 </td>
    <td style="text-align:left;"> lymph node ihc </td>
    <td style="text-align:left;"> NA </td>
+   <td style="text-align:left;"> nodes </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> tcga-a1-a0sk </td>
+   <td style="text-align:left;"> 10/17/1956 </td>
+   <td style="text-align:left;"> 5/1/2014 </td>
+   <td style="text-align:left;"> lymph nodes examined </td>
+   <td style="text-align:left;"> 4 </td>
    <td style="text-align:left;"> nodes </td>
   </tr>
 </tbody>
