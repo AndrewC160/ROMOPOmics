@@ -12,7 +12,7 @@ readInputFile(
 )
 }
 \arguments{
-\item{input_file}{Name of a TSV file containing required alias column names.}
+\item{input_file}{Name of a TSV/CSV file containing required alias column names.}
 
 \item{data_model}{Data model being used, typically as a tibble returned by loadDataModel().}
 
