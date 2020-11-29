@@ -15,6 +15,7 @@ LazyData: true
 RoxygenNote: 7.1.1
 Suggests: 
     knitr,
-    rmarkdown
+    rmarkdown,
+    testthat
 VignetteBuilder: knitr
 Imports: DBI, GEOquery, RCurl, RSQLite, data.table, dplyr, magrittr, stringr, tibble, tidyr, tidyverse
