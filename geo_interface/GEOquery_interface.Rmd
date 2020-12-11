@@ -12,7 +12,6 @@ library(GEOquery)
 library(tidyverse)
 library(rmarkdown)
 library(kableExtra)
-library(data.table)
 library(RCurl)
 library(here)
 
@@ -23,9 +22,9 @@ library(here)
 #}
 #data_dir  <- file.path(base_dir,"data")
 #src_dir   <- file.path(base_dir,"R")
-base_dir  <- here("geo_interface")
-data_dir  <- here("geo_interface","data")
-src_dir   <- here("geo_interface","R")
+base_dir  <- here()
+data_dir  <- here("data")
+src_dir   <- here("R")
 lapply(dir(src_dir,full.names = TRUE),source)
 ```
 
@@ -104,7 +103,7 @@ We placed the GEO derived metadata fields into mask templates for deciding how t
 total_tests <- 50 #Invalid IDs get excluded, so 50 -> ~30 or so on average.
 rnd_ids_txt <- file.path(data_dir,"ds_seeds.txt")
 if(file.exists(rnd_ids_txt)){
-  gds_ids   <- fread(rnd_ids_txt,stringsAsFactors=FALSE) %>% unlist(use.names = FALSE)
+  gds_ids   <- data.table::fread(rnd_ids_txt,stringsAsFactors=FALSE) %>% unlist(use.names = FALSE)
 }else{
   gds_ids   <- sapply(c(1:total_tests), function(x)
                 paste(sample(0:9,size = 3,replace = TRUE),collapse="")) %>%

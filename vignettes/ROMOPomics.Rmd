@@ -18,13 +18,6 @@ knitr::opts_chunk$set(
 
 # ROMOPOmics
 
-## Install
-
-```{r,eval=F}
-devtools::install_github("AndrewC160/ROMOPomics",force=T) #for installation reference and not run
-```
-
-
 ## Introduction
 
 ```{r setup, include=FALSE}
