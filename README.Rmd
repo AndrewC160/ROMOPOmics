@@ -3,9 +3,7 @@ title: "ROMOPOmics - An OMOPOmics R package"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
   html_document:
-    toc: true
     keep_md: yes
-    print_df: paged
   github_document: default
 ---
 

@@ -3,9 +3,7 @@ title: "ROMOPOmics - An OMOPOmics R package"
 date: "13 December, 2020"
 output:
   html_document:
-    toc: true
     keep_md: yes
-    print_df: paged
   github_document: default
 ---
 
