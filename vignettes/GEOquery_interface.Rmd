@@ -1,0 +1,278 @@
+---
+title: "GEOquery Interface"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: 
+  rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{GEOquery Interface}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE,message = FALSE,warning = F)
+
+library(ROMOPOmics)
+library(GEOquery)
+library(tidyverse)
+library(rmarkdown)
+library(kableExtra)
+library(RCurl)
+library(here)
+
+base_dir  <- here()
+data_dir  <- here("data")
+png_dir  <- here("man/figures")
+```
+
+# Warning
+
+Running this vignette locally will download very large soft files from GEO. If your machine cannot accomodate a couple GBs of data please do not run locally for feear of maxing out your memory.
+
+# Standardizing GEO data
+
+The Gene Expression Omnibus (GEO) is a public repository of over 4000 data-sets and 130,000 data-series of different types of 'omics data. All the sample files are hosted on their FTP site. More data is added for every publication submitted by an NIH funded group. The sample metadata is also available but is nonstandard and hard to retrieve/parse. 
+
+# From GEOquery to ROMOPomics
+
+GEO has an available API package called [GEOquery](https://www.bioconductor.org/packages/release/bioc/html/GEOquery.html). GEOquery standdadrdizes the retrieval of data from these datasets and series, which are stored in S3 R objects. But sample data is hard to compile into a readily accessible, structured format from these objects, especially across datasets and series. 
+
+ROMOPOmics can facilitate the standardization of the retrieved data for compiling into OMOP format. GEOquery essentially serves as the initial data retrieval and ROMOPOmics the final standardizer. 
+
+# GEOquery-ROMOPOmics framework
+
+Call a `importGEO()` function which
+
+**A)** Downloads GEO data (GDS/GSE) using their API, 
+
+**B)** constructs a table of available metadata from the S3 objects, and
+
+**C)** constructs a mask file connecting nonstandard fields to standard OMOP fields. 
+
+Completing the framework will provide an easy interface with which users can modify column names, pick and choose column data to include, etc. This may be better served by a Shiny application, which I have begun work on...but there's still a ways to go before it's useful.
+
+# GEOquery data definitions
+
+* **DataSets:** Curated sets of GEO sample data; a collection of biologically and statistically comparable GEO samples, the basis of GEOquery tools. Samples in a `DataSet` share the same `Platform`, and calculations are (presumed) to be calculated in the same way (background processing, normalizing, etc.).
+    + **GDSxxx**
+* **Platforms:** Describes elements of an array (cDNAs, probe sets, antibodies, etc.) OR elements that may be detected and / or quantified in that data set (peptides, SAGE tags, etc.).
+    + **GPLxxx**
+* **Series:** Set of related `Samples` that are part of a group, how they are related, and how they are ordered. Provides focal point and description of the experiment, and may contain tables of extracted data, summary conclusions, and/or analyses.
+    + **GSExxx**
+* **Samples:** Sample records describe sample handling, manipulations to each, and abundance measurements.
+    + **GSMxxx**
+    + Potentially lots of these; need to decide how to handle these, package probably shouldn't download 150 samples on a whim.
+
+# Main framework functions: fetch_geo_datasets() and fetch_geo_series()
+ 
+Functions accept one or more character strings for GEO `Datasets` (always format "GDSn+") and `GEO Series` (always format "GSEn+"), respectively. The function call retrieves all associated GPL and GSE objects (and GDS, for `Dataset` queries), and packages these into a list along with their respective metadata. Function calls that return invalid URLs are omitted and are added to an `invalid_url` list entry. For each valid ID, the respective `GEOquery` objects are retrieved (GDS,GPL,GSE), though for now samples (GSM) are not (some series have hundreds of samples, each with fairly large objects associated). If multiple datasets are included in the list a merged metadata table is returned that includes data from all metadata tables combined. Finally, an empty mask is returned
+
+# `fetch_geo_datasets()`
+
+An example function call looks like this:
+
+```{r get_geo_dataset,echo=TRUE,warning=FALSE,message=FALSE}
+geos  <- fetch_geo_datasets(geo_dataset_ids = c("GDS507","GDS508","GDS509"),data_dir = data_dir)
+md    <- geos$merged_metadata
+```
+
+## Object layout
+
+This is what the function call output resembles:
+
+![fetch_geo_datasets() output.](`r file.path(png_dir,"geo_import_datasets.png")`){width=50%}
+
+## Details on the merged metadata:
+
+Metadata across the GDS accessions are merged if consistent across samples OR found in the `Dataset` column data; otherwise things get complicated, and it's difficult to parse what should go where, apply to which samples, etc. We can look into other ways to go about this later. Since the original GDS/GPL/GSE objects are included in the GEO list, these values can be accessed normally using the GEOquery package (e.g. `Columns(geos$GDS509$GDS[[1]])`). Below is a sample of rows and columns from the combined table (`r paste0(paste(dim(md),collapse=" sample rows x ")," metadata columns")`).
+
+```{r displayMetadata,echo=FALSE}
+md %>%
+  select(sample,gse_id,gse_title,gse_supplementary_file) %>%
+  distinct() %>%
+  head(n=5) %>%
+  ungroup() %>%
+  kable() %>%
+  kable_styling(full_width = FALSE)
+```
+
+## Investigating GEO fields for mask building 
+
+We placed the GEO derived metadata fields into mask templates for deciding how to convert to OMOP standard fields.
+
+```{r get_random_gds}
+total_tests <- 50 #Invalid IDs get excluded, so 50 -> ~30 or so on average.
+rnd_ids_txt <- file.path(data_dir,"ds_seeds.txt")
+if(file.exists(rnd_ids_txt)){
+  gds_ids   <- data.table::fread(rnd_ids_txt,stringsAsFactors=FALSE) %>% unlist(use.names = FALSE)
+}else{
+  gds_ids   <- sapply(c(1:total_tests), function(x)
+                paste(sample(0:9,size = 3,replace = TRUE),collapse="")) %>%
+                  paste0("GDS",.)
+  write(gds_ids,file = rnd_ids_txt)
+}
+
+#Get a list of all GDS inputs.
+test_rds    <- file.path(data_dir,"ds_tests.rds")
+if(file.exists(test_rds)){
+  gds_list  <- readRDS(test_rds)
+}else{
+  gds_list  <- fetch_geo_datasets(geo_dataset_ids = gds_ids,data_dir = data_dir)
+  saveRDS(gds_list,file = test_rds)
+}
+```
+
+```{r get_randomized_metadata}
+gds_cols    <- lapply(gds_list[grepl("^GDS",names(gds_list))], function(x) x$metadata) %>%
+                lapply(colnames) %>% 
+                unlist() %>%
+                enframe(name="sample",value="col_name") %>%
+                group_by(col_name) %>%
+                summarize(count = n(),
+                          samples = list(sample),
+                          .groups="drop") %>%
+                arrange(desc(count)) %>%
+                mutate(component = case_when(grepl("^gds",col_name) ~ "Dataset",
+                                             grepl("^gpl",col_name) ~ "Platform",
+                                             grepl("^gse",col_name) ~ "Series",
+                                             TRUE ~ "Other") %>%
+                                    factor(levels=c("Dataset","Platform","Series","Other")))
+```
+
+```{r tableConsistentColumns}
+consistent_columns  <- gds_cols %>%
+                        #filter(count == sum(grepl("^GDS",names(gds_list)))) %>% 
+                        merge(gds_list$blank_mask,by.x = "col_name",by.y="alias") %>%
+                        as_tibble() %>%
+                        select(-count,-samples) %>%
+                        arrange(na_count) %>%
+                        group_split(component)
+names(consistent_columns) <- c("Dataset","Platform","Series","Other")
+```
+
+**Details on this investigation:** Since some metadata values and columns vary between `Datasets`, I randomly sampled `r length(gds_ids)` IDs (randomly changed the numeric components of the IDs) and pulled each of them (`r sum(grepl("^GDS",names(gds_list)))` were valid URLs). Among these, the following metadata were present, and those that weren't found in all samples are filled in with NA values (indicated in this table by the `NA_count` column). While these data are combined into one table, I've split them into tabs by origin here. The total dimensions of the metadata table are `r paste(paste(dim(gds_list$merged_metadata),collapse=" sample rows x "),"metadata columns")`, and this table shows only the metadata values (`col_name`), how many NA values are present in the merged table (indicating some Datasets didn't have these columns; `NA_count`), and up to 10 examples of the values in these columns (brackets indicate that additional values in the table are not shown).
+
+## Consistent metadata entries {.tabset}
+
+### Dataset
+
+`r consistent_columns$Dataset %>% select(-component) %>% kable() %>% kable_styling(full_width = FALSE)`
+
+### Platform
+
+`r consistent_columns$Platform %>% select(-component) %>% kable() %>% kable_styling(full_width = FALSE)`
+
+### Series
+
+`r consistent_columns$Series %>% select(-component) %>% kable() %>% kable_styling(full_width = FALSE)`
+
+### Other
+
+`r consistent_columns$Other %>% select(-component) %>% kable() %>% kable_styling(full_width = FALSE)`
+
+
+
+# `fetch_geo_series()`
+
+An example function call looks like this:
+
+```{r get_geo_series,echo=TRUE,warning=FALSE,message=FALSE,eval=FALSE}
+geos  <- fetch_geo_series(geo_series_ids = c("GSE100001","GSE000002","GSE000003"),data_dir = data_dir)
+md    <- geos$merged_metadata
+```
+
+## Object layout
+
+This is what the function call output resembles:
+
+![fetch_geo_series() output.](`r file.path(png_dir,"geo_import_series.png")`){width=50%}
+
+## Example query
+
+GEO queries can be done [online](https://www.ncbi.nlm.nih.gov/gds), and query/filter syntax can be found [here](https://www.ncbi.nlm.nih.gov/geo/info/qqtutorial.html). To find a few useful sequencing datasets I used the following filter, which is stored in `data/ds_ids_kidney_sequencing.txt`. I use these GSE ids to create our output list:
+
+```
+Expression profiling by high throughput sequencing[DataSet Type] 
+    human[organism] OR mouse[organism] 
+    kidney[Sample source]
+```
+
+```{r get_sequencing_datsets}
+srch_res  <- parse_geo_text_results(file.path(data_dir,"ds_ids_kidney_seqencing.txt"))
+seq_ids   <- srch_res %>% select(dataset) %>% unlist(use.names=FALSE)
+#Some kind of error with GSE144622, remove it.
+seq_ids   <- seq_ids[seq_ids != "GSE144622"]
+geo_list  <- fetch_geo_series(geo_series_ids = seq_ids,data_dir = data_dir)
+```
+
+```{r get_sequencing_metadata}
+sum_m_data  <- geo_list$merged_metadata
+write.table(sum_m_data,file = file.path(data_dir,"example_metadata_table.tsv"),sep = "\t",row.names = FALSE,quote = FALSE)
+write.table(arrange(geo_list$blank_mask,na_count),file=file.path(data_dir,"example_mask.tsv"),sep="\t",row.names=FALSE,quote=FALSE)
+values      <- sum_m_data %>% 
+                summarize_all(function(x) list(x)) %>% 
+                pivot_longer(cols = everything()) %>%
+                rowwise() %>%
+                mutate(NA_count = sum(unlist(sapply(value,is.na))),
+                       value=list(truncate_by_chars(unique(as.character(value)),40)),
+                       examples= case_when(
+                         length(value) == 1 ~ value[[1]],
+                         length(value) <= 10 ~ paste(unlist(value),collapse=", "),
+                         length(value) > 10 ~ paste0(
+                                                paste(unlist(value)[sample(1:length(unlist(value)),size = 3,replace=TRUE)],collapse=", "),
+                                                  ", etc. [",prettyNum(length(value),big.mark = ","),"]")))
+m_data      <- lapply(geo_list[grepl("^G",names(geo_list))], function(x) x$metadata)
+
+geo_cols    <- lapply(m_data,colnames) %>% 
+                unlist() %>%
+                enframe(name="sample",value="col_name") %>%
+                group_by(col_name) %>%
+                summarize(count = n(),
+                          samples = list(sample),
+                          .groups="drop") %>%
+                arrange(desc(count)) %>%
+                mutate(component = case_when(grepl("^gpl",col_name) ~ "Platform",
+                                             grepl("^gse",col_name) ~ "Series",
+                                             TRUE ~ "Other") %>%
+                                    factor(levels=c("Platform","Series","Other")))
+```
+
+```{r tableConsistentColumnsSequencing}
+consistent_columns  <- geo_cols %>%
+                        merge(select(values,-value),by.x = "col_name",by.y="name") %>%
+                        as_tibble() %>%
+                        select(-count,-samples) %>%
+                        arrange(NA_count) %>%
+                        group_split(component)
+names(consistent_columns) <- c("Platform","Series","Other")
+```
+
+## Consistent sequencing metadata entries {.tabset}
+
+Again, we merged the metadata with dimensions: `r paste(paste(dim(geo_list$merged_metadata),collapse=" sample rows x "),"metadata value columns")` and show how a mask template connects, potentially, GEO fields with OMOP standard fields.
+
+### Platform
+
+`r consistent_columns$Platform %>% select(-component) %>% kable() %>% kable_styling(full_width = FALSE)`
+
+### Series
+
+`r consistent_columns$Series %>% select(-component) %>% kable() %>% kable_styling(full_width = FALSE)`
+
+### Other
+
+`r consistent_columns$Other %>% select(-component) %>% kable() %>% kable_styling(full_width = FALSE)`
+
+# Application: Human growth is associated with distinct patterns of gene expression in evolutionarily conserved networks by Stevens et al. 2013
+
+Retrieving data and the metadata for a collection of IDs such as in this paper would be extremely helpful for reproducing or extending published work. Here I compiled the 9 GSE IDs from the paper and I show that we can merge the metadata from all these series. The metadata fields are often redundant so great care needs to be done in cleaning these fields, but this is the beginning of converting these data into OMOP format. 
+
+```{r testSeries,eval=TRUE}
+
+gse_ids <- c("GSE9006", "GSE26440", "GSE11504", "TABM666", "GSE6011", "GSE37721", "GSE20307", "GSE20436")
+
+stevens_gse_lst <- fetch_geo_series(gse_ids,data_dir = data_dir)
+
+stevens_gse_lst$merged_metadata
+
+```

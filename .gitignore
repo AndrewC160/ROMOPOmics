@@ -3,10 +3,15 @@
 .Rapp.history
 # Session Data files
 .RData
+data/ds_tests.rds
 #MAC
 .DS_Store
 # User-specific files
 .Ruserdata
+# Large GEO files
+data/GSE*
+data/GPL*
+data/GDS*
 # Example code in package build process
 *-Ex.R
 # Output files from R CMD build
