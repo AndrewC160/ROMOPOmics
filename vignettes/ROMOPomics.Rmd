@@ -35,13 +35,13 @@ knitr::opts_chunk$set(echo = TRUE)
 dirs          <- list()
 dirs$base     <- file.path(find_root(criterion = criteria$is_r_package))
 dirs$figs     <- file.path(dirs$base,"man/figures")
-dirs$demo     <- file.path(dirs$base,"demo")
-dirs$data     <- file.path(dirs$demo,"data")
-dirs$masks    <- file.path(dirs$demo,"masks")
+dirs$data     <- file.path(dirs$base,"data")
+dirs$masks    <- file.path(dirs$base,"data")
 
 #Files.
 dm_file     <- system.file("extdata","OMOP_CDM_v6_0_custom.csv",package="ROMOPOmics",mustWork = TRUE)
 tcga_files  <- dir(dirs$data,full.names = TRUE,pattern="brca")
+tcga_files <- tcga_files[!grepl("mask",tcga_files)]
 names(tcga_files) <- gsub(".csv","",basename(tcga_files))
 
 select <- dplyr::select
@@ -94,7 +94,6 @@ Load the master common data model file from *extdata* and return the table's inf
 dm <- loadDataModel(as_table_list = FALSE)
 
 ```
-
 
 ## Step 2: Design and load input masks.
 

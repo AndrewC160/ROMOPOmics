@@ -1,18 +1,29 @@
+---
+title: "Download and Processing TCGA data"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: 
+  rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{ROMOPOmics}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
 
-# PURPOSE --------
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
 
-#' To load, reformat, and structure TCGA data for use by ROMOPOmics
+This vignette contains the code for downloading and processing the BRCA Mutation and Clinical data
 
-
-# load libraries ----------------------------------------------------------
+```{r clinical_data}
 
 library(tidyverse)
 library(data.table)
 library(RTCGA.clinical)
 library(RTCGA.mutations)
-
-
-# cleaning and reformatting BRCA clinical data --------------------------------------------------------------
 
 brca_clinical_dt_wide <- 
   RTCGA.clinical::BRCA.clinical %>% 
@@ -95,7 +106,9 @@ barcodes <-
   unlist %>% 
   unname
 
-# cleaning and reformatting BRCA mutation data --------------------------------------------------------------
+```
+
+```{r mutation_data}
 
 brca_mutation_dt_wide <- 
   RTCGA.mutations::BRCA.mutations %>% 
@@ -167,3 +180,7 @@ brca_mutation_dt_long_snack_case_wide_transpose_reorder[1:10,1:5]
 
 brca_mutation_dt_long_snack_case_wide_transpose_reorder %>% 
   fwrite("../data/brca_mutation.csv")
+
+
+
+```
