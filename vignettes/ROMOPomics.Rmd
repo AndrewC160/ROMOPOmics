@@ -179,7 +179,7 @@ In this example using these masks, the OMOP tables included are `r paste(names(d
 The tables compiled in `db_inputs` are now formatted for creating a SQLite database. The package `dplyr` has built-in SQLite functionality, which is wrapped in the function `buildSQLDBR()`. However, building a database using any other package is amenable here.
 
 ```{r buildDatabase,echo=TRUE}
-omop_db     <- buildSQLDBR(db_inputs,sql_db_file = file.path(dirs$base,"sqlDB.sqlite"))
+omop_db     <- buildSQLDBR(db_inputs,sql_db_file = file.path(dirs$data,"sqlDB.sqlite"))
 
 dbListTables(omop_db)
 dbListFields(omop_db,"PERSON")
@@ -247,7 +247,7 @@ omop_inputs <- list(brca_clinical=readInputFile(input_file = tcga_files$brca_cli
                                                  data_model = dm,
                                                  mask_table = msks$brca_mutation))
 db_inputs   <- combineInputTables(input_table_list = omop_inputs)
-omop_db     <- buildSQLDBR(omop_tables = db_inputs,file.path(dirs$base,"TCGA.sqlite"))
+omop_db     <- buildSQLDBR(omop_tables = db_inputs,file.path(dirs$data,"TCGA.sqlite"))
 dbListTables(omop_db)
 ```
 
@@ -262,6 +262,6 @@ msks        <- loadModelMasks(msk_file)
 in_file     <- file.path(dirs$data,"GSE60682_standard.tsv")
 omop_inputs <- readInputFile(input_file=in_file,data_model=dm,mask_table=msks,transpose_input_table = TRUE)
 db_inputs   <- combineInputTables(input_table_list = omop_inputs)
-omop_db     <- buildSQLDBR(omop_tables = db_inputs, sql_db_file=file.path(dirs$base,"GSE60682_sqlDB.sqlite"))
+omop_db     <- buildSQLDBR(omop_tables = db_inputs, sql_db_file=file.path(dirs$data,"GSE60682_sqlDB.sqlite"))
 dbListTables(omop_db)
 ```
