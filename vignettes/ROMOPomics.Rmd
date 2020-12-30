@@ -197,6 +197,8 @@ dbGetQuery(omop_db,
  WHERE file_remote_repo_id IS NOT NULL and person_source_value is "tcga-3c-aaau" 
  ORDER BY "file_remote_repo_value"') %>%
   mutate_all(function(x) gsub("_"," ",x)) %>%
+  distinct() %>% 
+  head(20) %>% 
   kable() %>%
   kable_styling(full_width=FALSE) 
 
@@ -218,10 +220,10 @@ inner_join(tbl(omop_db,"PERSON"),
          measurement_source_value,
          value_as_number,
          unit_source_value) %>%
-  filter(charindex("lymph",measurement_source_value),
-         !is.null(death_datetime)) %>%
+  filter(charindex("lymph",measurement_source_value)) %>%
   as_tibble() %>%
   mutate_all(function(x) gsub("_"," ",x)) %>%
+  head(20) %>% 
   kable() %>%
   kable_styling(full_width=FALSE)
 
@@ -232,14 +234,15 @@ inner_join(tbl(omop_db,"PERSON"),
 Here is the 'too long; didn't read` section. Below are the steps to convert patient and sample data into the OMOP framework using ROMOPOmics:
 
 ## TCGA data
+
 ```
 library(ROMOPOmics)
 dm_file     <- system.file("extdata","OMOP_CDM_v6_0_custom.csv",package="ROMOPOmics",mustWork = TRUE)
 dm          <- loadDataModel(master_table_file = dm_file)
 tcga_files  <- list(brca_clinical=file.path(dirs$data,"brca_clinical.csv"),
                     brca_mutation=file.path(dirs$data,"brca_mutation.csv"))
-msks        <- list(brca_clinical=loadModelMasks(file.path(dirs$masks,"brca_clinical_mask.tsv")),
-                    brca_mutation=loadModelMasks(file.path(dirs$masks,"brca_mutation_mask.tsv")))
+msks        <- list(brca_clinical=loadModelMasks(file.path(dirs$masks,"brca_clinical_mask.csv")),
+                    brca_mutation=loadModelMasks(file.path(dirs$masks,"brca_mutation_mask.csv")))
 omop_inputs <- list(brca_clinical=readInputFile(input_file = tcga_files$brca_clinical,
                                                  data_model = dm,
                                                  mask_table = msks$brca_clinical),
@@ -252,14 +255,15 @@ dbListTables(omop_db)
 ```
 
 ## ATAC-seq data
+
 ```
 dm_file     <- system.file("extdata","OMOP_CDM_v6_0_custom.csv",package="ROMOPOmics",mustWork = TRUE)
 dm          <- loadDataModel(master_table_file = dm_file)
 
-msk_file    <- file.path(dirs$masks,"GSE60682_standard_mask.tsv")
+msk_file    <- file.path(dirs$masks,"GSE60682_standard_mask.csv")
 msks        <- loadModelMasks(msk_file)
 
-in_file     <- file.path(dirs$data,"GSE60682_standard.tsv")
+in_file     <- file.path(dirs$data,"GSE60682_standard.csv")
 omop_inputs <- readInputFile(input_file=in_file,data_model=dm,mask_table=msks,transpose_input_table = TRUE)
 db_inputs   <- combineInputTables(input_table_list = omop_inputs)
 omop_db     <- buildSQLDBR(omop_tables = db_inputs, sql_db_file=file.path(dirs$data,"GSE60682_sqlDB.sqlite"))

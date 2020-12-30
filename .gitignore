@@ -3,12 +3,14 @@
 .Rapp.history
 # Session Data files
 .RData
-data/ds_tests.rds
 #MAC
 .DS_Store
 # User-specific files
 .Ruserdata
+# Data generation file
+vignette/Downloading_Processing_TCGA.Rmd
 # Large GEO files
+data/ds_tests.rds
 data/GSE*
 data/GPL*
 data/GDS*
@@ -41,6 +43,5 @@ sqlDB.sqlite
 #Other
 *.gz
 *.soft
-*.txt
 *.tsv
 inst/doc

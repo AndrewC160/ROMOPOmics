@@ -1,0 +1,53 @@
+---
+title: "Nof1"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Nof1}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup,message=F}
+library(ROMOPOmics)
+library(tidyverse)
+```
+
+# Creating a database of 1
+
+Let's say we have a cancer patient Sally that has undergone treatment and genomic testing. If we have that information available to us, we can generate her own database of clinical and 'omics data.
+
+# Data Model
+
+```{r loadDataModel,echo=TRUE}
+
+dm <- loadDataModel(as_table_list = FALSE)
+
+```
+
+# Input Data
+
+We need to have a matrix of information for Sally
+
+```{r data_generation}
+
+df <- 
+data.frame(
+  "patient" = "Sally",
+  "cancer" = "ovarian",
+  "subtype" = "endometrioid",
+  "cancer_report" = "MSK Impact report",
+  "specimen" = "follicle",
+  "specimen_id" = "123456"
+  )
+
+df %>% write_csv("../data/Nof1.csv")
+
+```
+
