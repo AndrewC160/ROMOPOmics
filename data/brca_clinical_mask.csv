@@ -17,12 +17,12 @@ date_of_treatment,11/13/14,specimen_datetime,SPECIMEN,,
 ethnicity,not hispanic or latino,ethnicity_source_concept_id,PERSON,,
 gender,female,gender_source_value,PERSON,,
 lymph_node_examined_count_desc,lymph nodes examined,measurement_source_value,MEASUREMENT,2,lymph nodes examined
-lymph_node_examined_count,13,value_as_number,MEASUREMENT,2,NA
+lymph_node_examined_count,13,value_as_number,MEASUREMENT,2,
 lymph_node_examined_count_unit,nodes,unit_source_value,MEASUREMENT,2,nodes
-lymph_node_count_date,6/19/04,measurement_datetime,MEASUREMENT,2,NA
+lymph_node_count_date,6/19/04,measurement_datetime,MEASUREMENT,2,
 lymphnodes_he,lymph node he,measurement_source_value,MEASUREMENT,3,lymph node he
-number_of_lymphnodes_positive_by_he,4,value_as_number,MEASUREMENT,3,NA
+number_of_lymphnodes_positive_by_he,4,value_as_number,MEASUREMENT,3,
 number_of_lymphnodes_positive_by_he_unit,nodes,unit_source_value,MEASUREMENT,3,nodes
 lymphnodes_ihc,lympth node ihc,measurement_source_value,MEASUREMENT,4,lymph node ihc
-number_of_lymphnodes_positive_by_ihc,NA,value_as_number,MEASUREMENT,4,NA
+number_of_lymphnodes_positive_by_ihc,NA,value_as_number,MEASUREMENT,4,
 number_of_lymphnodes_positive_by_ihc_unit,nodes,unit_source_value,MEASUREMENT,4,nodes
