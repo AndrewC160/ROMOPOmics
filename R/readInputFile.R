@@ -40,7 +40,7 @@ readInputFile <- function(input_file,data_model,mask_table,transpose_input_table
               drop_na(table) %>% 
               as_tibble() %>%
               rename_at(vars(starts_with("V")), function(x) gsub("V",fl_nm,x)) %>%
-              select(table,field,field_idx,alias,set_value,everything()) %>%
+              dplyr::select(table,field,field_idx,alias,set_value,everything()) %>%
               mutate_all(function(x) ifelse(x=="",NA,x)) %>%
               select_if(function(x) !all(is.na(x)))
 
@@ -49,7 +49,7 @@ readInputFile <- function(input_file,data_model,mask_table,transpose_input_table
   
   #If a set_value was provided, change all corresponding table values to that.
   if("set_value" %in% colnames(in_tab)){
-    set_vals<- in_tab %>% select(set_value) %>% unlist(use.names=FALSE)
+    set_vals<- in_tab %>% dplyr::select(set_value) %>% unlist(use.names=FALSE)
     in_tab[which(!is.na(set_vals)),col_nms] <- set_vals[which(!is.na(set_vals))]
   }
 
@@ -60,7 +60,7 @@ readInputFile <- function(input_file,data_model,mask_table,transpose_input_table
   #The "standard table" is now the entire data model with mapped inputs, all
   # unspecified values as NA. Each individual entry is stored in unique column.
   data_model %>%
-    select(table,field,required,type,description,table_index) %>% #Only keep standard cols.
+    dplyr::select(table,field,required,type,description,table_index) %>% #Only keep standard cols.
     mutate(table=toupper(table)) %>%
     merge(out_tab,all=TRUE) %>%
     as_tibble() %>%
