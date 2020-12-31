@@ -1,0 +1,7 @@
+alias,example1,field,table,field_idx,set_value
+patient,Sally,person_id,person,NA,NA
+tumor_type,glioblastoma,specimen_source_value,specimen,NA,NA
+cancer_report,MSK Impact report,note_title,note,NA,NA
+specimen,brain,anatomic_site_source_value,specimen,NA,NA
+mutation_1,ARID1A,gene_name,variation,1,copy number variation
+mutation_2,ARID1B,gene_name,variation,2,SNP

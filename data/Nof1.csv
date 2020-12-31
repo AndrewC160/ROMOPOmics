@@ -1,2 +1,2 @@
-patient,cancer,subtype,cancer_report,specimen,specimen_id
-Sally,ovarian,endometrioid,MSK Impact report,follicle,123456
+patient,tumor_type,cancer_report,specimen,mutation_1,mutation_2
+Sally,glioblastoma,MSK Impact report,brain,ARID1A,ARID1B

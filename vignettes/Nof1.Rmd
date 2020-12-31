@@ -40,14 +40,76 @@ We need to have a matrix of information for Sally
 df <- 
 data.frame(
   "patient" = "Sally",
-  "cancer" = "ovarian",
-  "subtype" = "endometrioid",
+  "tumor_type" = "glioblastoma",
   "cancer_report" = "MSK Impact report",
-  "specimen" = "follicle",
-  "specimen_id" = "123456"
+  "specimen" = "brain",
+  "mutation_1" = "ARID1A",
+  "mutation_2" = "ARID1B"
   )
 
 df %>% write_csv("../data/Nof1.csv")
 
+df
+
 ```
 
+# Mask Data
+
+We need to have a mask in order to map to OMOP's standard concepts, fields, and tables
+
+```{r mask_generation}
+
+mask_df <- 
+data.frame(
+  "alias" = 
+    colnames(df),
+  "example1" = 
+    df[1,] %>% unlist() %>% levels(),
+  "field" = 
+    c("person_id","specimen_source_value","note_title","anatomic_site_source_value","gene_name","gene_name"),
+  "table" = 
+    c("person","specimen","note","specimen","variation","variation"),
+  "field_idx" = 
+    c(NA,NA,NA,NA,1,2),
+  "set_value" =
+    c(NA,NA,NA,NA,"copy number variation","SNP")
+)
+
+mask_df %>% write_csv("../data/Nof1_mask.csv")
+
+mask_df
+
+```
+
+# Load Mask Data
+
+```{r load_masks}
+
+msks <- loadModelMasks(mask_files = "../data/")
+
+```
+
+# Translate into Common Data Model
+
+```{r translate}
+
+nof1data <- list.files('../data/',"Nof1.csv")
+
+omop_inputs <- 
+  readInputFile(
+    input_file = "../data/Nof1.csv",
+    mask_table = msks$Nof1,
+    data_model = dm
+    )
+
+omop_inputs
+
+```
+
+# Make database input tables
+
+```{r db}
+
+db_inputs   <- combineInputTables(input_table_list = omop_inputs)
+
+```
