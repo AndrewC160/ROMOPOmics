@@ -87,10 +87,9 @@ DBI::dbListTables(omop_db)
 ```
 
 ```
-##  [1] "COHORT"               "CONDITION_OCCURRENCE" "DRUG_EXPOSURE"       
-##  [4] "MEASUREMENT"          "OBSERVATION"          "PERSON"              
-##  [7] "PROVIDER"             "SEQUENCING"           "SPECIMEN"            
-## [10] "sqlite_stat1"         "sqlite_stat4"
+## [1] "CONDITION_OCCURRENCE" "DRUG_EXPOSURE"        "PERSON"              
+## [4] "PROVIDER"             "SEQUENCING"           "SPECIMEN"            
+## [7] "sqlite_stat1"         "sqlite_stat4"
 ```
 
 ### GEO accessions from Stevens et al. 2013
