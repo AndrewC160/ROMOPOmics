@@ -1,4 +1,4 @@
-alias,example1,field,table,field_idx,set_value
+﻿alias,example1,field,table,field_idx,set_value
 bcr_patient_barcode,tcga-3c-aaau,person_source_value,PERSON,,
 bcr,nationwide children's hospital,care_site_id,PROVIDER,,
 file_uuid,31548443-603d-49d3-ab80-945e3867dd9f,file_remote_repo_id,PROVIDER,,
