@@ -7,6 +7,7 @@
 .DS_Store
 # User-specific files
 .Ruserdata
+*.sqlite
 # Data generation file
 vignette/Downloading_Processing_TCGA.Rmd
 # Large GEO files
