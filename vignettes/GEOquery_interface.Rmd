@@ -102,7 +102,7 @@ We placed the GEO derived metadata fields into mask templates for deciding how t
 
 ```{r get_random_gds}
 total_tests <- 50 #Invalid IDs get excluded, so 50 -> ~30 or so on average.
-rnd_ids_txt <- file.path(data_dir,"ds_seeds.txt")
+rnd_ids_txt <- system.file("extdata","ds_seeds.txt",package="ROMOPOmics",mustWork = TRUE)
 if(file.exists(rnd_ids_txt)){
   gds_ids   <- data.table::fread(rnd_ids_txt,stringsAsFactors=FALSE) %>% unlist(use.names = FALSE)
 }else{
@@ -198,7 +198,7 @@ Expression profiling by high throughput sequencing[DataSet Type]
 ```
 
 ```{r get_sequencing_datsets}
-srch_res  <- parse_geo_text_results(file.path(data_dir,"ds_ids_kidney_seqencing.txt"))
+srch_res  <- parse_geo_text_results(system.file("extdata","ds_ids_kidney_sequencing.txt",package="ROMOPOmics",mustWork = TRUE))
 seq_ids   <- srch_res %>% select(dataset) %>% unlist(use.names=FALSE)
 #Some kind of error with GSE144622, remove it.
 seq_ids   <- seq_ids[seq_ids != "GSE144622"]
