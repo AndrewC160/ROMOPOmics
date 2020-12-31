@@ -12,3 +12,4 @@ tumor_sample_barcode,TCGA-A1-A0SB-01A-11D-A142-09,file_remote_repo_id,SEQUENCING
 tumor_sample_barcode_metric,transcripts,metric_source_value,SEQUENCING,2,transcripts
 tumor_sample_uuid,db9d40fb-bfce-4c3b-a6c2-41c5c88982f1,specimen_source_id,SPECIMEN,,
 validation_method,none,sequencing_validation_method,SEQUENCING,,
+
