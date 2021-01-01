@@ -35,7 +35,8 @@ using two different input datasets.
 
 ## Package overview
 
-See our vignette [ROMOPOmics](vignettes/ROMOPOmics.Rmd)
+See our vignette
+[ROMOPOmics](https://github.com/AndrewC160/ROMOPOmics/blob/master/vignettes/ROMOPomics.Rmd)
 
 ## Use Cases
 
