@@ -1,10 +1,5 @@
 ---
-title: "ROMOPOmics - An OMOPOmics R package"
-date: "`r format(Sys.time(), '%d %B, %Y')`"
-output:
-  html_document:
-    keep_md: yes
-  github_document: default
+output: github_document
 ---
 
 ```{r setup, include=FALSE}
