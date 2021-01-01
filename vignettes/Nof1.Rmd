@@ -47,7 +47,7 @@ data.frame(
   "mutation_2" = "ARID1B"
   )
 
-df %>% write_csv("../data/Nof1.csv")
+df %>% write_csv("../inst/extdata/Nof1.csv")
 
 df
 
@@ -75,7 +75,7 @@ data.frame(
     c(NA,NA,NA,NA,"copy number variation","SNP")
 )
 
-mask_df %>% write_csv("../data/Nof1_mask.csv")
+mask_df %>% write_csv("../inst/extdata/Nof1_mask.csv")
 
 mask_df
 
@@ -85,7 +85,7 @@ mask_df
 
 ```{r load_masks}
 
-msks <- loadModelMasks(mask_files = "../data/")
+msks <- loadModelMasks(mask_files = "../inst/extdata")
 
 ```
 
@@ -93,11 +93,11 @@ msks <- loadModelMasks(mask_files = "../data/")
 
 ```{r translate}
 
-nof1data <- list.files('../data/',"Nof1.csv")
+nof1data <- list.files('../inst/extdata',"Nof1.csv")
 
 omop_inputs <- 
   readInputFile(
-    input_file = "../data/Nof1.csv",
+    input_file = "../inst/extdata/Nof1.csv",
     mask_table = msks$Nof1,
     data_model = dm
     )
@@ -111,5 +111,33 @@ omop_inputs
 ```{r db}
 
 db_inputs   <- combineInputTables(input_table_list = omop_inputs)
+
+```
+
+# Make OMOP database
+
+```{r omop_db}
+
+omop_db     <- buildSQLDBR(db_inputs,sql_db_file = file.path(tempdir(),"Nof1.sqlite"))
+
+```
+
+# Show tables
+
+```{r show_tables}
+
+DBI::dbListTables(omop_db)
+
+DBI::dbGetQuery(omop_db,
+'SELECT *
+from person
+')
+
+DBI::dbGetQuery(omop_db,
+'SELECT *
+from variation
+')
+
+DBI::dbDisconnect(omop_db)
 
 ```

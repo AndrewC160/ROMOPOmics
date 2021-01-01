@@ -1,8 +1,6 @@
 ---
 title: "ROMOPOmics"
-date: "`r format(Sys.time(), '%d %B, %Y')`"
-output: 
-  rmarkdown::html_vignette
+output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{ROMOPOmics}
   %\VignetteEngine{knitr::rmarkdown}
@@ -40,13 +38,16 @@ dirs$masks    <- file.path(dirs$base,"data")
 
 #Files.
 dm_file     <- system.file("extdata","OMOP_CDM_v6_0_custom.csv",package="ROMOPOmics",mustWork = TRUE)
-tcga_files  <- dir(dirs$data,full.names = TRUE,pattern="brca")
-tcga_files <- tcga_files[!grepl("mask",tcga_files)]
-names(tcga_files) <- gsub(".csv","",basename(tcga_files))
+tcga_files  <- 
+  c(
+    "brca_clinical" = system.file("extdata","brca_clinical.csv",package="ROMOPOmics",mustWork = TRUE),
+    "brca_mutation" = system.file("extdata","brca_mutation.csv",package="ROMOPOmics",mustWork = TRUE)
+  )
 
-select <- dplyr::select
+#select <- dplyr::select
 
 dm <- loadDataModel(as_table_list = FALSE)
+
 ```
 
 ROMOPOmics was developed to standardize metadata of high throughput assays with associated patient clinical data. Biomedical research datasets such as RNA-Seq experiments or other next generation sequencing datasets contain a mixture of clinical traits of the studied patients including data derived from samples perturbed by different assays, at different timepoints, with varying protocols, and more. Additionally, next generation sequencing datasets include metadata on pipeline byproducts (alignment files, raw reads, readmes, etc.) and analysis results of any type (gene counts, differential expression data, quality control analyses, etc.). Our package ROMOPOmics provides a framework to standardize these datasets and a pipeline to convert this information into a SQL-friendly database that is easily accessed by users. After installation of our R package from the github repository, users specify a data directory and a mask file describing how to map their data's fields into a common data model. The resulting standardized data tables are then formatted into a SQLite database for easily interoperating and sharing the dataset.
@@ -99,7 +100,7 @@ dm <- loadDataModel(as_table_list = FALSE)
 
 ```{r loadMasks,echo=TRUE}
 
-msks <- loadModelMasks(mask_files = dirs$masks)
+msks <- loadModelMasks(mask_files = "../inst/extdata")
 
 ```
 
@@ -179,7 +180,7 @@ In this example using these masks, the OMOP tables included are `r paste(names(d
 The tables compiled in `db_inputs` are now formatted for creating a SQLite database. The package `dplyr` has built-in SQLite functionality, which is wrapped in the function `buildSQLDBR()`. However, building a database using any other package is amenable here.
 
 ```{r buildDatabase,echo=TRUE}
-omop_db     <- buildSQLDBR(db_inputs,sql_db_file = file.path(dirs$data,"sqlDB.sqlite"))
+omop_db     <- buildSQLDBR(db_inputs,sql_db_file = file.path(tempdir(),"TCGA_brca.sqlite"))
 
 dbListTables(omop_db)
 dbListFields(omop_db,"PERSON")
@@ -227,6 +228,7 @@ inner_join(tbl(omop_db,"PERSON"),
   kable() %>%
   kable_styling(full_width=FALSE)
 
+DBI::dbDisconnect(omop_db)
 ```
 
 # TL;DR:
@@ -239,10 +241,13 @@ Here is the 'too long; didn't read` section. Below are the steps to convert pati
 library(ROMOPOmics)
 dm_file     <- system.file("extdata","OMOP_CDM_v6_0_custom.csv",package="ROMOPOmics",mustWork = TRUE)
 dm          <- loadDataModel(master_table_file = dm_file)
-tcga_files  <- list(brca_clinical=file.path(dirs$data,"brca_clinical.csv"),
-                    brca_mutation=file.path(dirs$data,"brca_mutation.csv"))
-msks        <- list(brca_clinical=loadModelMasks(file.path(dirs$masks,"brca_clinical_mask.csv")),
-                    brca_mutation=loadModelMasks(file.path(dirs$masks,"brca_mutation_mask.csv")))
+tcga_files  <- 
+  list(
+    "brca_clinical" = system.file("extdata","brca_clinical.csv",package="ROMOPOmics",mustWork = TRUE),
+    "brca_mutation" = system.file("extdata","brca_mutation.csv",package="ROMOPOmics",mustWork = TRUE)
+  )
+msks        <- list(brca_clinical=loadModelMasks(system.file("extdata","brca_clinical_mask.csv",package="ROMOPOmics",mustWork = TRUE)),
+                    brca_mutation=loadModelMasks(system.file("extdata","brca_mutation_mask.csv",package="ROMOPOmics",mustWork = TRUE)))
 omop_inputs <- list(brca_clinical=readInputFile(input_file = tcga_files$brca_clinical,
                                                  data_model = dm,
                                                  mask_table = msks$brca_clinical),
@@ -250,8 +255,9 @@ omop_inputs <- list(brca_clinical=readInputFile(input_file = tcga_files$brca_cli
                                                  data_model = dm,
                                                  mask_table = msks$brca_mutation))
 db_inputs   <- combineInputTables(input_table_list = omop_inputs)
-omop_db     <- buildSQLDBR(omop_tables = db_inputs,file.path(dirs$data,"TCGA.sqlite"))
+omop_db     <- buildSQLDBR(omop_tables = db_inputs,file.path(tempdir(),"TCGA.sqlite"))
 dbListTables(omop_db)
+DBI::dbDisconnect(omop_db)
 ```
 
 ## ATAC-seq data
@@ -260,10 +266,10 @@ dbListTables(omop_db)
 dm_file     <- system.file("extdata","OMOP_CDM_v6_0_custom.csv",package="ROMOPOmics",mustWork = TRUE)
 dm          <- loadDataModel(master_table_file = dm_file)
 
-msk_file    <- file.path(dirs$masks,"GSE60682_standard_mask.csv")
+msk_file    <- system.file("extdata","GSE60682_standard_mask.csv",package="ROMOPOmics",mustWork = TRUE)
 msks        <- loadModelMasks(msk_file)
 
-in_file     <- file.path(dirs$data,"GSE60682_standard.csv")
+in_file     <- system.file("extdata","GSE60682_standard.csv",package="ROMOPOmics",mustWork = TRUE)
 omop_inputs <- readInputFile(input_file=in_file,data_model=dm,mask_table=msks,transpose_input_table = TRUE)
 db_inputs   <- combineInputTables(input_table_list = omop_inputs)
 omop_db     <- buildSQLDBR(omop_tables = db_inputs, sql_db_file=file.path(dirs$data,"GSE60682_sqlDB.sqlite"))

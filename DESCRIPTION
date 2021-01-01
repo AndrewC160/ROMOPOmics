@@ -4,7 +4,7 @@ Title: ROMOPOmics: incorporating 'Omics Data Into The Observational Medical Outc
 Version: 0.1.0
 Authors@R: 
     c(person("Andrew", "Clugston", email = "clugstonas@gmail.com", role = c("aut", "cre")),
-    person("Nicholas", "Giangreco", email = "nick.giangreco@gmail.com", role = c("aut")))
+    person("Nicholas", "Giangreco", email = "nick.giangreco@gmail.com", role = c("aut","cph")))
 Author: Andrew Clugston [aut, cre]
     Nicholas Giangreco [aut]
 Maintainer: Andrew Clugston <anc174@pitt.edu>
@@ -16,6 +16,25 @@ RoxygenNote: 7.1.1
 Suggests: 
     knitr,
     rmarkdown,
-    testthat
+    testthat,
+    RTCGA.clinical,
+    RTCGA.mutations,
+    data.table,
+    magrittr,
+    kableExtra,
+    here,
+    RSQLite,
+    rprojroot
 VignetteBuilder: knitr
-Imports: DBI, GEOquery, RCurl, RSQLite, data.table, dplyr, magrittr, stringr, tibble, tidyr, tidyverse
+Imports: 
+    DBI, 
+    GEOquery, 
+    RCurl, 
+    RSQLite, 
+    data.table, 
+    dplyr, 
+    magrittr, 
+    stringr, 
+    tibble, 
+    tidyr, 
+    tidyverse

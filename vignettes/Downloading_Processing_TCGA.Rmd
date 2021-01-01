@@ -1,10 +1,8 @@
 ---
 title: "Download and Processing TCGA data"
-date: "`r format(Sys.time(), '%d %B, %Y')`"
-output: 
-  rmarkdown::html_vignette
+output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{ROMOPOmics}
+  %\VignetteIndexEntry{Download and Processing TCGA data}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -96,8 +94,9 @@ brca_clinical_dt_long_snack_case_wide_transpose_reorder$column_name <-
 brca_clinical_dt_long_snack_case_wide_transpose_reorder$column_name[[1]] <- 
   paste0("bcr_",brca_clinical_dt_long_snack_case_wide_transpose_reorder$column_name[[1]])
 
-brca_clinical_dt_long_snack_case_wide_transpose_reorder %>% 
-  fwrite("../data/brca_clinical.csv")
+brca_clinical_dt_long_snack_case_wide_transpose_reorder 
+
+#brca_clinical_dt_long_snack_case_wide_transpose_reorder %>% fwrite("../data/brca_clinical.csv")
 
 barcodes <- 
   brca_clinical_dt_long_snack_case_wide_transpose_reorder[
@@ -178,8 +177,9 @@ brca_mutation_dt_long_snack_case_wide_transpose_reorder <-
 dim(brca_mutation_dt_long_snack_case_wide_transpose_reorder)
 brca_mutation_dt_long_snack_case_wide_transpose_reorder[1:10,1:5]
 
-brca_mutation_dt_long_snack_case_wide_transpose_reorder %>% 
-  fwrite("../data/brca_mutation.csv")
+brca_mutation_dt_long_snack_case_wide_transpose_reorder
+
+#brca_mutation_dt_long_snack_case_wide_transpose_reorder %>% fwrite("../data/brca_mutation.csv")
 
 
 
