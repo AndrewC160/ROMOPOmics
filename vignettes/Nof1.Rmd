@@ -64,7 +64,7 @@ data.frame(
   "alias" = 
     colnames(df),
   "example1" = 
-    df[1,] %>% unlist() %>% levels(),
+    df[1,] %>% unlist() %>% unname(),
   "field" = 
     c("person_id","specimen_source_value","note_title","anatomic_site_source_value","gene_name","gene_name"),
   "table" = 

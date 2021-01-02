@@ -47,11 +47,6 @@ library(ROMOPOmics)
 ### TCGA data
 
 ``` r
-dirs          <- list()
-dirs$base     <- file.path(rprojroot::find_root(criterion = rprojroot::criteria$is_r_package))
-dirs$figs     <- file.path(dirs$base,"man/figures")
-dirs$data     <- file.path(dirs$base,"data")
-dirs$masks    <- file.path(dirs$base,"masks")
 dm_file     <- system.file("extdata","OMOP_CDM_v6_0_custom.csv",package="ROMOPOmics",mustWork = TRUE)
 dm          <- loadDataModel(master_table_file = dm_file)
 tcga_files  <- 

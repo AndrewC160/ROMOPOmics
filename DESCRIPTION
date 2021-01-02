@@ -15,16 +15,7 @@ LazyData: true
 RoxygenNote: 7.1.1
 Suggests: 
     knitr,
-    rmarkdown,
-    testthat,
-    RTCGA.clinical,
-    RTCGA.mutations,
-    data.table,
-    magrittr,
-    kableExtra,
-    here,
-    RSQLite,
-    rprojroot
+    rmarkdown
 VignetteBuilder: knitr
 Imports: 
     DBI, 
@@ -33,8 +24,14 @@ Imports:
     RSQLite, 
     data.table, 
     dplyr, 
-    magrittr, 
     stringr, 
     tibble, 
     tidyr, 
-    tidyverse
+    tidyverse,
+    testthat,
+    RTCGA.clinical,
+    RTCGA.mutations,
+    magrittr,
+    kableExtra,
+    here,
+    rprojroot

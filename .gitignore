@@ -8,13 +8,6 @@
 # User-specific files
 .Ruserdata
 *.sqlite
-# Data generation file
-vignette/Downloading_Processing_TCGA.Rmd
-# Large GEO files
-data/ds_tests.rds
-data/*.gz
-data/*.soft
-data/*.sqlite
 # Example code in package build process
 *-Ex.R
 # Output files from R CMD build
@@ -38,7 +31,6 @@ vignettes/*.pdf
 # R Environment Variables
 .Renviron
 .Rproj.user
-sqlDB.sqlite
 # HTML documents
 *.html
 #Other
@@ -46,3 +38,5 @@ sqlDB.sqlite
 *.soft
 *.tsv
 inst/doc
+docs
+doc
