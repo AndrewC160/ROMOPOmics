@@ -9,13 +9,17 @@
 #' 
 #' @param geo_in GEO object as returned by getGEO() (GDS or GSE, generally).
 #' 
-#' @import tidyverse
+#' @importFrom tibble rownames_to_column as_tibble 
+#' @importFrom dplyr rename rowwise filter mutate ungroup select
+#' @importFrom magrittr %>%
+#' @importFrom GEOquery Meta
 #' 
 #' @export
 
 parse_geo_metadata  <- function(geo_in=NULL){
   if(is.null(geo_in)){return(NULL)}
   #Get all metadata.
+  values <- NULL
   md  <- as(Meta(geo_in),"matrix") %>%
           as.data.frame() %>%
           rownames_to_column("detail") %>%
@@ -34,6 +38,7 @@ parse_geo_metadata  <- function(geo_in=NULL){
   #Summary of other information
   #If < 15 entries are present in the value column, paste these into a basic
   # character string.
+  len <- detail <- values <- NULL
   md_comp_text  <- md_complex %>%
                     rowwise() %>%
                     mutate(len=length(values)) %>%
@@ -46,7 +51,7 @@ parse_geo_metadata  <- function(geo_in=NULL){
                     select(text) %>%
                     unlist(use.names=FALSE) %>%
                     paste(collapse="\n\n")
-  
+  metadata <- coldata <- other_values <- NULL
   if(is(geo_in,"GDS")){
     col_dat   <- parse_gds_coldata(geo_in)
     return(list(metadata= md_basic,

@@ -8,7 +8,10 @@
 #' 
 #' @param geo_input GEO input objet (list) from a fetch function.
 #' 
-#' @import tidyverse
+#' @importFrom dplyr mutate mutate_if rename_all rename
+#' @importFrom data.table merge.data.table
+#' @importFrom magrittr %>%
+#' @importFrom tibble as_tibble
 #' 
 #' @export
 

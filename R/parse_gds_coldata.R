@@ -8,13 +8,16 @@
 #' 
 #' @param gds_in GDS object to be parsed, generally as returned by getGEO().
 #' 
-#' @import GEOquery
-#' @import tidyverse
+#' @importFrom GEOquery Columns
+#' @importFrom tibble as_tibble
+#' @importFrom dplyr rowwise mutate mutate_at ungroup group_by vars group_cols
+#' @importFrom tidyr unnest separate pivot_wider
 #' 
 #' @export
 
 parse_gds_coldata <- function(gds_in=NULL){
   if(is.null(gds_in)){return(NULL)}
+  description <- NULL
   gds_in %>%
     Columns() %>%
     as_tibble() %>%

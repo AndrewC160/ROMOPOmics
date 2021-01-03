@@ -18,13 +18,13 @@ loadDataModel}
 \description{
 \code{loadDataModel()} reads in a CSV file containing the definitions of a given data
 model and returns either one table or a list of tables. By default, this function returns 
-the OMOP data model 'OMOP_CDM_v6_0_custom.csv' at \link{https://github.com/OHDSI/CommonDataModel}.
+the OMOP data model 'OMOP_CDM_v6_0_custom.csv' \href{https://github.com/OHDSI/CommonDataModel}{here}.
 We included in the extdata folder of the installed ROMOPOmics package, 
 but similarly formatted tables can be used as well as long as they are packaged as CSVs.
 }
 \details{
 See the OMOP CDM document for more details creating a data model 
-\link{https://github.com/OHDSI/CommonDataModel/blob/master/OMOP_CDM_v6_0.pdf}.
+\href{https://github.com/OHDSI/CommonDataModel/blob/master/OMOP_CDM_v6_0.pdf}{here}.
 
 There are two requirements:
 1. The CDM file will have two fields 'field' and 'table'

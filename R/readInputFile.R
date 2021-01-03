@@ -47,6 +47,7 @@ expand_entry_columns  <- function(table_in){
 #' @importFrom dplyr mutate mutate_all
 #' @importFrom magrittr %>%
 transpose_to_colwise  <- function(input_tibble){
+  rowname <- value <- NULL
   input_tibble %>%
     mutate(rowname=paste0("V",row_number()+1)) %>%
     mutate_all(as.character) %>%
@@ -91,6 +92,7 @@ readInputFile <- function(input_file,data_model,mask_table,transpose_input_table
   }else{
     in_tab<- fread(input_file,header = FALSE,stringsAsFactors = FALSE)
   }
+  V0 <- required <- type <- description <- tabke_index <- NULL
   table <- alias <- field <- field_idx <- set_value <- NULL
   in_tab  <- in_tab %>%
               rename_all(function(x) paste0("V",c(0:(length(x)-1)))) %>%

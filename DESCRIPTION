@@ -38,4 +38,7 @@ Imports:
     magrittr,
     kableExtra,
     here,
-    rprojroot
+    rprojroot,
+    methods,
+    testthat,
+    dbplyr

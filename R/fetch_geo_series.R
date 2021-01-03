@@ -12,12 +12,13 @@
 #' purported URL: if invalid, a warning message is displayed. With multiple
 #' IDs, these are added to a text object denoting which failed.
 #' 
-#' @param geo_dataset_ids GEO series ID (e.g. "GSE158946") or a list of such IDs.
+#' @param geo_series_ids GEO series ID (e.g. "GSE158946") or a list of such IDs.
 #' @param data_dir Directory into which retrieved data objects should be stored. NULL by default, in which case saved to memory in a temp folder.
 #' 
-#' @import tidyverse
-#' @import stringr
-#' @import RCurl
+#' @importFrom GEOquery getGEO
+#' @importFrom dplyr mutate
+#' @importFrom tibble as_tibble
+#' @importFrom stringr str_to_upper str_detect
 #' 
 #' @export
 
@@ -28,6 +29,7 @@ fetch_geo_series  <- function(geo_series_ids,data_dir = NULL){
     names(geo)[char_ents]   <- geo_series_ids[char_ents]
     
     #Provide merged metadata table, include only valid metadata.
+    is <- NULL
     valid_ents<- sapply(geo, is, class="list")
     invld_lst <- names(valid_ents)[!valid_ents]
     geo       <- geo[valid_ents]
@@ -42,8 +44,8 @@ fetch_geo_series  <- function(geo_series_ids,data_dir = NULL){
     return("Invalid URL.")
   }else{
     #Check for valid string entry.
-    gdid  <- toupper(geo_series_ids)
-    if(!stringr::str_detect(gdid,pattern = "^GSE[:digit:]+$")){
+    gdid  <- str_to_upper(geo_series_ids)
+    if(!str_detect(gdid,pattern = "^GSE[:digit:]+$")){
       message('Series ID should fit the format "GSEnnnnnn".')
       return("Invalid URL.")
     }

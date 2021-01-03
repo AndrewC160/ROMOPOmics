@@ -15,6 +15,7 @@
 #' @importFrom magrittr %>%
 read_mask <- function(file_name){
   set_value <- field_idx <- NULL
+  alias <- field <- . <- NULL
   tb  <- fread(file_name,header = TRUE,stringsAsFactors = FALSE) %>%
     as_tibble() %>%
     mutate(set_value = if("set_value" %in% names(.)){set_value}else{NA},

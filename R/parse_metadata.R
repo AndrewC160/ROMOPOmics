@@ -9,7 +9,6 @@
 #' 
 #' @param object_in GEOquery object returned by getGEO() function.
 #' 
-#' @import GEOquery
 #' 
 #' @export
 

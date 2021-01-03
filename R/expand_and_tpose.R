@@ -11,7 +11,8 @@
 #' @param name_col Name of column containing transposed column names. Defaults to first column.
 #' @param vals_col Name of column containing transposed column values. Defaults to second column.
 #' 
-#' @import tidyverse
+#' @importFrom magrittr %>%
+#' @importFrom tibble as_tibble
 #' 
 #' @export
 

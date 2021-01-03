@@ -7,9 +7,9 @@
 fetch_geo_series(geo_series_ids, data_dir = NULL)
 }
 \arguments{
-\item{data_dir}{Directory into which retrieved data objects should be stored. NULL by default, in which case saved to memory in a temp folder.}
+\item{geo_series_ids}{GEO series ID (e.g. "GSE158946") or a list of such IDs.}
 
-\item{geo_dataset_ids}{GEO series ID (e.g. "GSE158946") or a list of such IDs.}
+\item{data_dir}{Directory into which retrieved data objects should be stored. NULL by default, in which case saved to memory in a temp folder.}
 }
 \description{
 Wrapper for most GEO import functions when incorporating GEOquery sample
