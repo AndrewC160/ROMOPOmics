@@ -11,8 +11,6 @@
 #' 
 #' @import tidyverse
 #' 
-#' @export
-
 metadata_mask   <- function(metadata_table,examples=3){
   metadata_table %>%
     summarize_all(list) %>%

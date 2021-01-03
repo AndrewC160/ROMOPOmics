@@ -8,7 +8,12 @@ Authors@R:
 Author: Andrew Clugston [aut, cre]
     Nicholas Giangreco [aut]
 Maintainer: Andrew Clugston <anc174@pitt.edu>
-Description: ROMOPOmics facilitates adding sequencing-type ('Omics) data into the OMOP data model, as well as incorporation of that data into an SQLite database for ease of use with existing healthcare or research data systems. Users can use ROMOPOmics to define and maintain a database that can be made readily available to other team members, stream lining the sharing of data and resources between multiple projects.
+Description: ROMOPOmics facilitates adding sequencing-type ('Omics) data into 
+    the OMOP data model, as well as incorporation of that data into an SQLite 
+    database for ease of use with existing healthcare or research data systems. 
+    Users can use ROMOPOmics to define and maintain a database that can be made 
+    readily available to other team members, stream lining the sharing of data 
+    and resources between multiple projects.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -28,7 +33,6 @@ Imports:
     tibble, 
     tidyr, 
     tidyverse,
-    testthat,
     RTCGA.clinical,
     RTCGA.mutations,
     magrittr,

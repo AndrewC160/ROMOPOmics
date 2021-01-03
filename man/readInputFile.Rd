@@ -2,7 +2,7 @@
 % Please edit documentation in R/readInputFile.R
 \name{readInputFile}
 \alias{readInputFile}
-\title{readInputFile}
+\title{Convert input data to OMOP formated data via CDM and mask}
 \usage{
 readInputFile(
   input_file,
@@ -20,12 +20,13 @@ readInputFile(
 
 \item{transpose_input_table}{Boolean; defaults to FALSE. If TRUE, transpose tables with one row per treatment/sample to one per column.
 
-readInputFile}
+readInputFile()}
 }
 \description{
-Given a TSV/CSV file containing a data set, that dataset's mask as formatted
-by loadModelMask(), and the desired data model produced by loadDataModel(),
-this function reads in that data table and funnels its fields into the 
+\code{readInputFile()} takes a TSV/CSV file containing an input data set 
+to be converted to the common data model format, that dataset's mask as formatted
+by loadModelMask(), and the desired data model produced by loadDataModel().
+This function reads in that data table and funnels its fields into the 
 appropriate tables and fields for the data model. All data tables are
 included at this stage, including those with no entries, which allows any
 data set produced by this function to be incorporated into the same database

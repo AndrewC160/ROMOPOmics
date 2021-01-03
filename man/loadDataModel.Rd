@@ -2,7 +2,7 @@
 % Please edit documentation in R/loadDataModel.R
 \name{loadDataModel}
 \alias{loadDataModel}
-\title{loadDataModel}
+\title{Upload a common data model}
 \usage{
 loadDataModel(master_table_file, as_table_list = FALSE)
 }
@@ -10,14 +10,29 @@ loadDataModel(master_table_file, as_table_list = FALSE)
 \item{master_table_file}{File containing the total data model used, including 
 "field", "required", "type", "description", and "table" fields.}
 
-\item{as_table_list}{If TRUE, return the data model split into a list of tables rather than as one solid table.
+\item{as_table_list}{If TRUE, return the data model split into a list of tables 
+rather than as one solid table.
 
 loadDataModel}
 }
 \description{
-Function reads in a CSV file containing the definitions of a given data
-model definitions and returns either as one table or as a list of tables. By
-default, this function returns the OMOP data model 'OMOP_CDM_v6_0_custom.csv' 
-included in the extdata folder of the installed ROMOPOmics package, 
+\code{loadDataModel()} reads in a CSV file containing the definitions of a given data
+model and returns either one table or a list of tables. By default, this function returns 
+the OMOP data model 'OMOP_CDM_v6_0_custom.csv' at \link{https://github.com/OHDSI/CommonDataModel}.
+We included in the extdata folder of the installed ROMOPOmics package, 
 but similarly formatted tables can be used as well as long as they are packaged as CSVs.
+}
+\details{
+See the OMOP CDM document for more details creating a data model 
+\link{https://github.com/OHDSI/CommonDataModel/blob/master/OMOP_CDM_v6_0.pdf}.
+
+There are two requirements:
+1. The CDM file will have two fields 'field' and 'table'
+2. All entries are non-empty strings
+
+Every table in the given CDM will have an associated id field 
+where the id field is table_id, for example. It describes the unique entry in that table 
+and serves as a foreign key to other tables. This id is created automatically within
+the function. But, it should be included under the field 'field' so that
+an index for this foreign key can be established.
 }

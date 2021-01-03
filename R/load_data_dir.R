@@ -10,8 +10,6 @@
 #' 
 #' @import tibble
 #' 
-#' @export
-
 load_data_dir <- function(dir_name){
   data_fls    <- Sys.glob(file.path(dir_name,"*.[ct]sv"))
   data_fls <- data_fls[!grepl("mask",data_fls)]

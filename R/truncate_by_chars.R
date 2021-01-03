@@ -12,7 +12,6 @@
 #' truncate_by_chars
 #' 
 #' @export
-
 truncate_by_chars   <- function(text_in,max_char=80){
   return(ifelse(nchar(as.character(text_in)) <= max_char,
                       text_in,

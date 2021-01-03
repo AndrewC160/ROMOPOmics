@@ -11,14 +11,12 @@
 #'
 #' combineInputTables()
 #'
-#' @importFrom data.table fread
-#' @import dplyr
-#' @import tidyr
-#' @import stringr
-#' @importFrom stats setNames
-#'
+#' @importFrom data.table fread merge.data.table
+#' @importFrom dplyr select mutate mutate_at rename_all group_by group_by_at ungroup summarize filter arrange distinct cur_group_id vars
+#' @importFrom tidyr as_tibble pivot_longer pivot_wider
+#' @importFrom stringr str_extract str_to_lower
+#' 
 #' @export
-
 combineInputTables  <- function(input_table_list){
   
   #Check if only one table was included, and if so en-list it.
@@ -46,7 +44,7 @@ combineInputTables  <- function(input_table_list){
                 pivot_wider(id_cols=name,names_from = table_field,values_from=value)
   #Group, sort, and index each table together.
   for(tab_nm in used_tbs){
-    idx_nm  <- paste0(tolower(tab_nm),"_id")
+    idx_nm  <- paste0(str_to_lower(tab_nm),"_id")
     idx_col <- paste0(tab_nm,"|",idx_nm)
     flds    <- select(tb,starts_with(tab_nm)) %>% colnames()
     tb      <- tb %>%

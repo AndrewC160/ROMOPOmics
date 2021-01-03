@@ -454,7 +454,7 @@ evs_cohort_name,No,VARCHAR(50),A foreign key to a record in the EVS_COHORT_DEFIN
 evs_cohort_definition_name,No,VARCHAR(50),A foreign key to a record in the EVS_COHORT_DEFINITION table containing relevant Cohort Definition information. Custom,evs_cohort_definition
 evs_cohort_definition_disease,No,VARCHAR(50),"The ""collection source"" or disease from which those in the collection are from. Custom",evs_cohort_definition
 evs_cohort_definition_type,No,VARCHAR(50),The definition type of the evs cohort. Custom,evs_cohort_definition
-person_id,,,,variation
-sequencing_id,,,,variation
-gene_name,,,,variation
-gene_variant_name,,,,
+person_id,,,CUSTOM,variation
+sequencing_id,,,CUSTOM,variation
+gene_name,,,CUSTOM,variation
+gene_variant_name,,,CUSTOM,variation

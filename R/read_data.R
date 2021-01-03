@@ -11,8 +11,6 @@
 #' @importFrom data.table fread
 #' @import dplyr
 #' 
-#' @export
-
 read_data <- function(file_name){
   tb  <- fread(file_name,header = TRUE,stringsAsFactors = FALSE) %>%
     as_tibble() 

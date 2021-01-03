@@ -12,13 +12,14 @@
 #'
 #' @export
 #'
-#' @import tidyverse
-#' @import DBI
-#' @import RSQLite
+#' @importFrom stats na.omit
+#' @importFrom DBI dbConnect
+#' @importFrom dplyr copy_to
+#' @importFrom RSQLite SQLite
 
 
 buildSQLDBR <- function(omop_tables,sql_db_file=":memory:"){
-  db        <- DBI::dbConnect(RSQLite::SQLite(),sql_db_file)
+  db        <- dbConnect(SQLite(),sql_db_file)
   #Use na.omit() in case some NA tables get through.
   lapply(na.omit(names(omop_tables)), function(x) copy_to(db,omop_tables[[x]],name=x,overwrite = TRUE,temporary = FALSE))
   #Return the connection.
