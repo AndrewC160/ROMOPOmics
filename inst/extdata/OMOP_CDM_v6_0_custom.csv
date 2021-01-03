@@ -456,5 +456,5 @@ evs_cohort_definition_disease,No,VARCHAR(50),"The ""collection source"" or disea
 evs_cohort_definition_type,No,VARCHAR(50),The definition type of the evs cohort. Custom,evs_cohort_definition
 person_id,,,CUSTOM,variation
 sequencing_id,,,CUSTOM,variation
-gene_name,,,CUSTOM,variation
-gene_variant_name,,,CUSTOM,variation
+variant_source_value,,,CUSTOM,variation
+variant_status_source_value,,,CUSTOM,variation

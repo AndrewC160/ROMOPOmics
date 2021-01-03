@@ -17,6 +17,7 @@
 #' 
 #' @import tidyverse
 #' @import stringr
+#' @import RCurl
 #' 
 #' @export
 

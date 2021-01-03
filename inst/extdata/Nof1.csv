@@ -1,2 +1,2 @@
-patient,tumor_type,cancer_report,specimen,mutation_1,mutation_2
-Sally,glioblastoma,MSK Impact report,brain,ARID1A,ARID1B
+patient,tumor_type,cancer_report,cancer_report_date,specimen,mutation_1,mutation_2,mutation_1_type,mutation_2_type
+Sally,glioblastoma,MSK Impact report,2018/03/01,brain,ARID1A,ARID1B,SNP,CNV

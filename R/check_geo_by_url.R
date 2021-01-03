@@ -8,6 +8,8 @@
 #' 
 #' @param id_input Character string of GSE or GDS ID; i.e. "GSE15896".
 #' 
+#' @import RCurl
+#' 
 #' @export
 
 
