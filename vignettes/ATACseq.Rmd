@@ -1,0 +1,132 @@
+---
+title: "ATAC-seq example"
+author: "Andrew"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{ATACseq}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+library(ROMOPOmics)
+library(tidyverse)
+library(knitr)
+library(kableExtra)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r runCode,echo=FALSE,eval=FALSE}
+
+```
+
+An advantage of the ROMOPOmics "mask" system is that it enables datasets with unique metadata values to be incorporated into a database. Given the variety of applications available for NGS data, similar files can denote different information entirely. Data produced while sequencing for transposase-accesible chromatin (ATAC-seq), for instance, varies considerably from data produced during RNA sequencing (RNA-seq), as do the processing and quality control processes. While both methods produce BAM and BED files, for instance, their meanings and usefulness can be worlds apart (e.g. BED file from an ATAC-seq pipeline may indicate accessible regions of the genome, while a BED file from RNA-seq may note gene locations). Using a mask to denote important metadata from each dataset independently allows both to be incorporated into a single database.
+
+##Load the data model.
+```{r loadDM}
+dm_file     <- system.file("extdata","OMOP_CDM_v6_0_custom.csv",package="ROMOPOmics",mustWork = TRUE)
+dm          <- loadDataModel(master_table_file = dm_file)
+```
+
+This analysis uses the [OHDSI CDM 6.0](https://github.com/OHDSI/CommonDataModel/blob/master/OMOP_CDM_v6_0.pdf), modified to include a `SEQUENCING` table (the ROMOPOmics default). This model includes `r nrow(dm)` fields (including table indices) across `r length(unique(dm$table))` tables.
+```{r showDM,echo=FALSE}
+dm %>%
+  filter(row_number() < 6) %>%
+  select(-table_index,-required) %>%
+  rbind(rep("...",ncol(.))) %>%
+  kable() %>%
+  kable_styling(full_width=FALSE)
+```
+
+##A sample/patient-centric metadata table
+```{r loadInputTable}
+in_file     <- system.file("extdata","GSE60682_standard.csv",package="ROMOPOmics",mustWork = TRUE)
+```
+```{r echo=FALSE}
+tb <- read.table(in_file,sep = ",",header = TRUE,stringsAsFactors = FALSE) %>% as_tibble
+```
+
+For this example, we have retrieved a dataset from the GEO series [`GSE60682`](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE60682), and produced a sample/patient-centric (one row per sequencing data file) `r paste(dim(tb),collapse=" x ")` table of metadata. This table is stored in the ROMOPOmics package's `extdata` folder:
+
+`ROMOPOmics/extdata/GSE60682_standard.csv`
+
+```{r showATACseqData,echo=FALSE}
+tb %>%
+  filter(row_number() < 6) %>%
+  select(patient,patient_name,sample_name,source.name,time_point,sex) %>%
+  rbind(rep("...",ncol(.))) %>%
+  cbind(`...`=rep("...",nrow(.))) %>%
+  kable() %>%
+  kable_styling(full_width=FALSE)
+```
+
+##Producing a mask
+
+We created a mask file in CSV format which depicts the metadata fields of interest and their destination tables and fields in the chosen data model. This mask file is saved in the ROMOPOMics package's `extdata` folder:
+
+`ROMOPOmics/extdata/GSE60682_standard_mask.csv`
+
+Entries in the `alias` column correspond to column names in the metadata table, and these values are mapped to CDM tables and fields in the mask's `table` and `field` columns, respectively.
+
+###The `set_value` column
+
+The `set_value` column is used to input data values that are to be consistent accross samples, such as the unit "ug/mL" in this example. This value will be applied to all `perturbation_dose_unit` fields in this data set.
+
+###Grouping fields for multiple observations
+
+A single patient may have multiple observations, and so to generate an observation-centric dataset this patient will need to be separated into multiple observations. This is achieved with the `field_idx` column,  which denotes fields that are to be grouped together for a unique observation. For instance, the `drug_source_value`, `quantity`, and `does_unit_source_value` fields denote the drug treatment, quantity, and unit (e.g. "Drug A", "50", and "ug/mL"), and they will need to be incorporated into one observation. If additional drug treatments are to be incorporated, another `field_idx` ID such as "2" would group them into another observation. This will ensure that these values are also grouped together, and it will map them into another observation for the purposes of generating an observation-centric database. Fields with no (or NA) `field_idx` entries are consistent accross observations (such as patient_name, organism, etc.).
+```{r produceMask}
+#msk_file    <- system.file("extdata","GSE60682_standard_mask.csv",package="ROMOPOmics",mustWork = TRUE)
+msk_file    <- file.path("/projects/andrew/ROMOPOmics/inst/extdata/GSE60682_standard_mask.csv")
+msks        <- loadModelMasks(msk_file)
+```
+```{r echo=FALSE}
+fld_num     <- length(msks$alias)
+tbl_nms     <- unique(msks$table)
+tbl_num     <- length(tbl_nms)
+```
+
+This mask incorporates `r fld_num` fields from the metadata table, and distributes them among as many fields in `r tbl_num` tables from the CDM: *`r paste(paste(tbl_nms[1:(tbl_num-1)],collapse=", "),"* and *",tbl_nms[tbl_num])`.*
+```{r showMask,echo=FALSE}
+msks %>%
+  arrange(field_idx) %>%
+  kable() %>%
+  kable_styling(full_width=FALSE)
+```
+
+##Read in the metadata table
+
+Once a metadata table and an appropriate mask are prepared, these are read and converted into CDM-appropriate, observation-centric input table. This is performed for each dataset to be incorporated into the database. This table includes rows for each table and field in the CDM, including those not used in the dataset.
+```{r readMetadataTable}
+omop_inputs <- readInputFile(input_file=in_file,data_model=dm,mask_table=msks,transpose_input_table = TRUE)
+```
+```{r showInput,echo=FALSE}
+omop_inputs %>%
+  select_if(function(x) any(!is.na(x))) %>%
+  filter(!is.na(GSE60682_standard1_1)) %>%
+  filter(row_number() < 6) %>%
+  select(1:10) %>%
+  select(-required,-type,-table_index,-description) %>%
+  rbind(rep("...",ncol(.))) %>%
+  cbind(`...`=rep("...",nrow(.))) %>%
+  kable() %>%
+  kable_styling(full_width=FALSE)
+```
+
+##Merging all datasets
+
+The input tables from all datasets (in this case just one) are then combined into one collection of CDM tables. These tables includ only those from the CDM that are not empty.
+```{r combineInputs}
+db_inputs   <- combineInputTables(input_table_list = omop_inputs)
+```
+```{r showAllTables,echo=FALSE}
+lapply(db_inputs, function(x) select_if(x, function(y) !all(is.na(y))) %>% filter(row_number() < 3))
+```
+
+##Produce and connect to a SQL database
+
+The formatted input tables containing each dataset can now be incorporated into a SQL database.
+```{r buildDB}
+omop_db     <- buildSQLDBR(omop_tables = db_inputs, sql_db_file=file.path(tempdir(),"GSE60682_sqlDB.sqlite"))
+DBI::dbListTables(omop_db)
+```
